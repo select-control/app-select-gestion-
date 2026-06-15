@@ -35,9 +35,11 @@ export async function updateSession(request: NextRequest) {
 
   const ruta = request.nextUrl.pathname;
   const esLogin = ruta.startsWith("/login");
+  // Rutas publicas (sin sesion): login y la pagina para fijar nueva contrasena.
+  const esPublica = esLogin || ruta.startsWith("/actualizar-clave");
 
-  // Sin sesion y no esta en login -> al login
-  if (!user && !esLogin) {
+  // Sin sesion y no esta en una ruta publica -> al login
+  if (!user && !esPublica) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
