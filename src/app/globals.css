@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  color: #0f172a;
+  background-color: #f4f7f6;
+  /* Blanco con un sutil tinte verde de marca en las esquinas */
+  background-image:
+    radial-gradient(700px circle at 0% -5%, rgba(31, 224, 122, 0.1), transparent 42%),
+    radial-gradient(600px circle at 100% 0%, rgba(31, 224, 122, 0.06), transparent 40%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(31, 224, 122, 0.25);
+  color: #064e2b;
+}
+
+/* Scrollbar claro con pulgar verde suave */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c8e6d4;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a7d8bc;
+}

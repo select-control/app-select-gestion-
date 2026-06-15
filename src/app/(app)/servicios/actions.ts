@@ -1,0 +1,181 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import { calcularHoras } from "@/lib/utils";
+
+export type ResultadoAccion = { ok: boolean; error?: string };
+
+function revalidar() {
+  revalidatePath("/servicios");
+  revalidatePath("/dashboard");
+  revalidatePath("/informes");
+  revalidatePath("/caja");
+}
+
+// ----------------------------------------------------------------------------
+// SERVICIOS
+// ----------------------------------------------------------------------------
+
+function leerServicio(formData: FormData) {
+  const especialRaw = String(formData.get("precio_especial") || "").trim();
+  // Vigilantes por cargo: campos del formulario "pc_<cargoId>" = nº necesarios.
+  const puestos_por_cargo: Record<string, number> = {};
+  formData.forEach((v, k) => {
+    if (k.startsWith("pc_")) {
+      const n = Math.max(0, Math.floor(Number(v) || 0));
+      if (n > 0) puestos_por_cargo[k.slice(3)] = n;
+    }
+  });
+  const total = Object.values(puestos_por_cargo).reduce((a, b) => a + b, 0);
+  return {
+    establecimiento_id: String(formData.get("establecimiento_id") || ""),
+    fecha: String(formData.get("fecha") || ""),
+    hora_inicio: String(formData.get("hora_inicio") || ""),
+    hora_fin: String(formData.get("hora_fin") || ""),
+    puestos_por_cargo,
+    puestos_necesarios: total,
+    precio_especial: especialRaw ? Number(especialRaw) : null,
+    observaciones: String(formData.get("observaciones") || "").trim() || null,
+    estado: String(formData.get("estado") || "Pendiente"),
+  };
+}
+
+function validarServicio(d: ReturnType<typeof leerServicio>): string | null {
+  if (!d.establecimiento_id) return "Selecciona un establecimiento.";
+  if (!d.fecha) return "Indica la fecha.";
+  if (!d.hora_inicio || !d.hora_fin) return "Indica hora de inicio y fin.";
+  return null;
+}
+
+/** Lee del establecimiento su tarifa estandar y su delegacion. */
+async function datosEstablecimiento(
+  supabase: ReturnType<typeof createClient>,
+  id: string
+): Promise<{ tarifa: number; delegacion: string | null }> {
+  const { data } = await supabase
+    .from("establecimientos")
+    .select("tarifa_hora_cliente, delegacion")
+    .eq("id", id)
+    .single();
+  return {
+    tarifa: Number(data?.tarifa_hora_cliente) || 0,
+    delegacion: data?.delegacion ?? null,
+  };
+}
+
+export async function crearServicio(
+  _prev: ResultadoAccion,
+  formData: FormData
+): Promise<ResultadoAccion> {
+  const supabase = createClient();
+  const datos = leerServicio(formData);
+  const err = validarServicio(datos);
+  if (err) return { ok: false, error: err };
+
+  const est = await datosEstablecimiento(supabase, datos.establecimiento_id);
+  const { error } = await supabase.from("servicios").insert({
+    ...datos,
+    precio_hora_cliente: est.tarifa,
+    delegacion: est.delegacion,
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidar();
+  return { ok: true };
+}
+
+export async function actualizarServicio(
+  _prev: ResultadoAccion,
+  formData: FormData
+): Promise<ResultadoAccion> {
+  const supabase = createClient();
+  const id = String(formData.get("id") || "");
+  const datos = leerServicio(formData);
+
+  if (!id) return { ok: false, error: "Falta el identificador." };
+  const err = validarServicio(datos);
+  if (err) return { ok: false, error: err };
+
+  const est = await datosEstablecimiento(supabase, datos.establecimiento_id);
+  const { error } = await supabase
+    .from("servicios")
+    .update({ ...datos, precio_hora_cliente: est.tarifa, delegacion: est.delegacion })
+    .eq("id", id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidar();
+  return { ok: true };
+}
+
+export async function borrarServicio(id: string): Promise<ResultadoAccion> {
+  const supabase = createClient();
+  const { error } = await supabase.from("servicios").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidar();
+  return { ok: true };
+}
+
+// ----------------------------------------------------------------------------
+// ASIGNACIONES
+// ----------------------------------------------------------------------------
+
+async function resolverCosteHora(
+  supabase: ReturnType<typeof createClient>,
+  cargo_id: string | null
+): Promise<number> {
+  if (!cargo_id) return 0;
+  const { data } = await supabase
+    .from("cargos")
+    .select("tarifa_hora")
+    .eq("id", cargo_id)
+    .single();
+  return Number(data?.tarifa_hora) || 0;
+}
+
+export async function crearAsignacion(payload: {
+  servicio_id: string;
+  trabajador_id: string | null;
+  cargo_id: string | null;
+  hueco: number;
+  hora_inicio: string;
+  hora_fin: string;
+  horas_extra: number;
+  precio_hora_extra: number;
+  extras: number;
+}): Promise<ResultadoAccion> {
+  const supabase = createClient();
+  if (!payload.servicio_id) return { ok: false, error: "Falta el servicio." };
+  if (!payload.hora_inicio || !payload.hora_fin)
+    return { ok: false, error: "Indica hora de inicio y fin." };
+
+  const coste_hora = await resolverCosteHora(supabase, payload.cargo_id);
+
+  const { error } = await supabase.from("asignaciones").insert({
+    servicio_id: payload.servicio_id,
+    trabajador_id: payload.trabajador_id,
+    cargo_id: payload.cargo_id,
+    hueco: payload.hueco || 1,
+    hora_inicio: payload.hora_inicio,
+    hora_fin: payload.hora_fin,
+    horas: calcularHoras(payload.hora_inicio, payload.hora_fin),
+    horas_extra: payload.horas_extra || 0,
+    precio_hora_extra: payload.precio_hora_extra || 0,
+    coste_hora,
+    extras: payload.extras || 0,
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidar();
+  return { ok: true };
+}
+
+export async function borrarAsignacion(id: string): Promise<ResultadoAccion> {
+  const supabase = createClient();
+  const { error } = await supabase.from("asignaciones").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidar();
+  return { ok: true };
+}
