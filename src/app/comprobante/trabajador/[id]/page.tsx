@@ -86,7 +86,7 @@ export default async function ComprobanteTrabajadorPage({
       <div className="mb-8 flex items-start justify-between">
         <div>
           <Logo height={44} />
-          <p className="mt-2 text-xs text-slate-500">SELECT CONTROL · Seguridad privada</p>
+          <p className="mt-2 text-xs text-slate-500">SELECT CONTROL</p>
         </div>
         <div className="text-right">
           <h1 className="text-xl font-bold">Comprobante de trabajador</h1>

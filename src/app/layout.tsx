@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SELECT · Control de servicios",
-  description: "Gestion de servicios para empresa de seguridad privada",
+  description: "Gestion de servicios y operarios",
 };
 
 export default function RootLayout({

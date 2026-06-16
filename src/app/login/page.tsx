@@ -173,7 +173,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          SELECT Control · Seguridad privada
+          SELECT Control
         </p>
       </div>
     </div>

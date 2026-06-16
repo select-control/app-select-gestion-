@@ -156,7 +156,7 @@ export default function ActualizarClavePage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          SELECT Control · Seguridad privada
+          SELECT Control
         </p>
       </div>
     </div>

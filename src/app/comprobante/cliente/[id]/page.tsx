@@ -64,7 +64,7 @@ export default async function ComprobanteClientePage({
       <div className="mb-8 flex items-start justify-between">
         <div>
           <Logo height={44} />
-          <p className="mt-2 text-xs text-slate-500">SELECT CONTROL · Seguridad privada</p>
+          <p className="mt-2 text-xs text-slate-500">SELECT CONTROL</p>
         </div>
         <div className="text-right">
           <h1 className="text-xl font-bold">Comprobante de cliente</h1>
@@ -83,7 +83,7 @@ export default async function ComprobanteClientePage({
           <tr className="border-b-2 border-slate-300 text-left text-slate-500">
             <th className="py-2 font-medium">Fecha</th>
             <th className="py-2 font-medium">Horario</th>
-            <th className="py-2 text-right font-medium">Vigilantes</th>
+            <th className="py-2 text-right font-medium">Operarios</th>
             <th className="py-2 text-right font-medium">Horas</th>
             <th className="py-2 text-right font-medium">Facturación</th>
           </tr>

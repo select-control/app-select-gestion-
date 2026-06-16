@@ -247,7 +247,7 @@ export function EstablecimientosClient({
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
               <p className="mb-1 text-sm font-medium text-slate-700">Tarifas por cargo (€/hora)</p>
               <p className="mb-3 text-xs text-slate-400">
-                Lo que se cobra a este cliente por cada tipo de vigilante. Deja en blanco para usar
+                Lo que se cobra a este cliente por cada tipo de operario. Deja en blanco para usar
                 la tarifa general.
               </p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
