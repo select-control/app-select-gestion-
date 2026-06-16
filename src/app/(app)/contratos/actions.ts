@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { DocumentoContrato } from "@/lib/types";
 
-export type ResultadoAccion = { ok: boolean; error?: string };
+export type ResultadoAccion = { ok: boolean; error?: string; id?: string };
 
 const BUCKET = "contratos";
 
@@ -26,10 +26,11 @@ export async function crearContrato(
 ): Promise<ResultadoAccion> {
   const supabase = createClient();
   const datos = leerFormulario(formData);
-  const { error } = await supabase.from("contratos").insert(datos);
+  const { data, error } = await supabase.from("contratos").insert(datos).select("id").single();
   if (error) return { ok: false, error: error.message };
   revalidatePath("/contratos");
-  return { ok: true };
+  revalidatePath("/establecimientos");
+  return { ok: true, id: data?.id as string | undefined };
 }
 
 export async function actualizarContrato(

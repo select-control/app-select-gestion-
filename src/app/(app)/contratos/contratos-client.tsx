@@ -64,7 +64,7 @@ export function ContratosClient({
   // refrescar, la sección de documentos se actualiza sola.
   const editando = editandoId ? contratos.find((c) => c.id === editandoId) ?? null : null;
 
-  const accion = editando ? actualizarContrato : crearContrato;
+  const accion = editandoId ? actualizarContrato : crearContrato;
   const [estado, formAction] = useFormState(accion, estadoInicial);
 
   const [subiendo, startSubir] = useTransition();
@@ -72,8 +72,16 @@ export function ContratosClient({
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (estado.ok) setModal(false);
-  }, [estado]);
+    if (!estado.ok) return;
+    if (estado.id) {
+      // Contrato recién creado: pasamos a modo edición (sin cerrar) para que
+      // aparezca el botón de adjuntar documentos al momento.
+      setEditandoId(estado.id);
+      router.refresh();
+    } else {
+      setModal(false);
+    }
+  }, [estado, router]);
 
   function abrirNuevo() {
     setEditandoId(null);
@@ -93,10 +101,10 @@ export function ContratosClient({
   }
 
   function onElegirArchivo(file: File | null) {
-    if (!file || !editando) return;
+    if (!file || !editandoId) return;
     setDocError(null);
     const fd = new FormData();
-    fd.set("id", editando.id);
+    fd.set("id", editandoId);
     fd.set("archivo", file);
     startSubir(async () => {
       const res = await subirDocumentoContrato(fd);
@@ -113,9 +121,9 @@ export function ContratosClient({
   }
 
   async function onBorrarDoc(path: string) {
-    if (!editando) return;
+    if (!editandoId) return;
     if (!confirm("¿Borrar este documento?")) return;
-    const res = await borrarDocumentoContrato(editando.id, path);
+    const res = await borrarDocumentoContrato(editandoId, path);
     if (!res.ok) alert(res.error);
     router.refresh();
   }
@@ -184,9 +192,9 @@ export function ContratosClient({
         </table>
       </div>
 
-      <Modal open={modal} onClose={() => setModal(false)} title={editando ? "Editar contrato" : "Nuevo contrato"} wide>
+      <Modal open={modal} onClose={() => setModal(false)} title={editandoId ? "Editar contrato" : "Nuevo contrato"} wide>
         <form action={formAction} className="space-y-4">
-          {editando && <input type="hidden" name="id" value={editando.id} />}
+          {editandoId && <input type="hidden" name="id" value={editandoId} />}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="numero">Nº de contrato</Label>
@@ -238,7 +246,7 @@ export function ContratosClient({
         <div className="mt-6 border-t border-slate-200 pt-5">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-900">Documentos del contrato</h3>
-            {editando && (
+            {editandoId && (
               <>
                 <input
                   ref={fileRef}
@@ -254,13 +262,13 @@ export function ContratosClient({
             )}
           </div>
 
-          {!editando ? (
+          {!editandoId ? (
             <p className="text-sm text-slate-400">Guarda el contrato primero para poder adjuntar documentos.</p>
-          ) : (editando.documentos?.length ?? 0) === 0 ? (
+          ) : (editando?.documentos?.length ?? 0) === 0 ? (
             <p className="text-sm text-slate-400">Sin documentos. Adjunta el contrato, anexos o imágenes (PDF, Word, fotos).</p>
           ) : (
             <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200">
-              {editando.documentos.map((d) => (
+              {(editando?.documentos ?? []).map((d) => (
                 <li key={d.path} className="flex items-center justify-between px-3 py-2 text-sm">
                   <button
                     type="button"
