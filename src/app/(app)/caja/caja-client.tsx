@@ -104,7 +104,7 @@ export function CajaClient({
         .map((s) => ({
           servicio: s,
           cliente: s.establecimientos?.nombre || "—",
-          importe: totalesServicio(s, s.asignaciones ?? []).facturacion,
+          importe: totalesServicio(s.asignaciones ?? []).facturacion,
         }))
         .filter((c) => c.importe > 0),
     [servicios]

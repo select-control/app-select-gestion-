@@ -6,6 +6,14 @@ import { createClient } from "@/lib/supabase/server";
 export type ResultadoAccion = { ok: boolean; error?: string };
 
 function leerFormulario(formData: FormData) {
+  // Tarifas por cargo: campos "tc_<cargoId>" = precio/hora que se cobra al cliente.
+  const tarifas_cliente: Record<string, number> = {};
+  formData.forEach((v, k) => {
+    if (k.startsWith("tc_")) {
+      const n = Number(v) || 0;
+      if (n > 0) tarifas_cliente[k.slice(3)] = n;
+    }
+  });
   return {
     nombre: String(formData.get("nombre") || "").trim(),
     razon_social: String(formData.get("razon_social") || "").trim() || null,
@@ -14,6 +22,7 @@ function leerFormulario(formData: FormData) {
     delegacion: String(formData.get("delegacion") || "").trim() || null,
     email: String(formData.get("email") || "").trim().toLowerCase() || null,
     tarifa_hora_cliente: Number(formData.get("tarifa_hora_cliente") || 0),
+    tarifas_cliente,
     activo: formData.get("activo") === "on" || formData.get("activo") === "true",
   };
 }

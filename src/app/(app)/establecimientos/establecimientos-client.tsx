@@ -8,7 +8,7 @@ import { Input, Label, Select } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/card";
 import { formatoEuros } from "@/lib/utils";
-import type { Rol, Establecimiento } from "@/lib/types";
+import type { Rol, Establecimiento, Cargo } from "@/lib/types";
 import {
   crearEstablecimiento,
   actualizarEstablecimiento,
@@ -29,9 +29,11 @@ function BotonGuardar() {
 
 export function EstablecimientosClient({
   establecimientos,
+  cargos,
   rol,
 }: {
   establecimientos: Establecimiento[];
+  cargos: Cargo[];
   rol: Rol;
 }) {
   const esAdmin = rol === "admin";
@@ -96,7 +98,7 @@ export function EstablecimientosClient({
               <th className="px-4 py-3 font-medium">Nombre</th>
               <th className="px-4 py-3 font-medium">Delegacion</th>
               <th className="px-4 py-3 font-medium">CIF</th>
-              {esAdmin && <th className="px-4 py-3 font-medium">Tarifa cliente/hora</th>}
+              {esAdmin && <th className="px-4 py-3 font-medium">Tarifa general/hora</th>}
               <th className="px-4 py-3 font-medium">Estado</th>
               <th className="px-4 py-3 text-right font-medium">Acciones</th>
             </tr>
@@ -219,7 +221,7 @@ export function EstablecimientosClient({
             </div>
             {esAdmin ? (
               <div>
-                <Label htmlFor="tarifa_hora_cliente">Tarifa cliente/hora (€)</Label>
+                <Label htmlFor="tarifa_hora_cliente">Tarifa general/hora (€)</Label>
                 <Input
                   id="tarifa_hora_cliente"
                   name="tarifa_hora_cliente"
@@ -228,6 +230,9 @@ export function EstablecimientosClient({
                   min="0"
                   defaultValue={editando?.tarifa_hora_cliente ?? 0}
                 />
+                <p className="mt-1 text-xs text-slate-400">
+                  Se usa si un cargo no tiene precio propio abajo.
+                </p>
               </div>
             ) : (
               <input
@@ -237,6 +242,32 @@ export function EstablecimientosClient({
               />
             )}
           </div>
+
+          {esAdmin && cargos.length > 0 && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <p className="mb-1 text-sm font-medium text-slate-700">Tarifas por cargo (€/hora)</p>
+              <p className="mb-3 text-xs text-slate-400">
+                Lo que se cobra a este cliente por cada tipo de vigilante. Deja en blanco para usar
+                la tarifa general.
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {cargos.map((c) => (
+                  <div key={c.id}>
+                    <Label htmlFor={`tc_${c.id}`}>{c.nombre}</Label>
+                    <Input
+                      id={`tc_${c.id}`}
+                      name={`tc_${c.id}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder={String(editando?.tarifa_hora_cliente ?? 0)}
+                      defaultValue={editando?.tarifas_cliente?.[c.id] ?? ""}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="activo">Estado</Label>

@@ -11,7 +11,6 @@ import { Card } from "@/components/ui/card";
 import { formatoEuros, formatoHoras } from "@/lib/utils";
 import {
   totalesAsignacion,
-  precioAplicado,
   type Rol,
   type ServicioConRelaciones,
 } from "@/lib/types";
@@ -69,7 +68,6 @@ export function InformesClient({
       }
     >();
     for (const s of filt) {
-      const precio = precioAplicado(s);
       const estId = s.establecimiento_id;
       const estNombre = s.establecimientos?.nombre || "—";
       for (const a of s.asignaciones ?? []) {
@@ -77,7 +75,7 @@ export function InformesClient({
         const nombre = a.trabajadores?.nombre || "Sin asignar";
         const iban = (a.trabajadores as { iban?: string | null } | null)?.iban ?? null;
         const horas = (a.horas || 0) + (a.horas_extra || 0);
-        const pago = totalesAsignacion(a, precio).coste;
+        const pago = totalesAsignacion(a).coste;
         let w = m.get(tid);
         if (!w) {
           w = { nombre, iban, horas: 0, pago: 0, est: new Map() };
@@ -113,7 +111,6 @@ export function InformesClient({
       }
     >();
     for (const s of filt) {
-      const precio = precioAplicado(s);
       const estId = s.establecimiento_id;
       const estNombre = s.establecimientos?.nombre || "—";
       let svcHoras = 0;
@@ -121,7 +118,7 @@ export function InformesClient({
       const personas = s.asignaciones?.length ?? 0;
       for (const a of s.asignaciones ?? []) {
         svcHoras += (a.horas || 0) + (a.horas_extra || 0);
-        svcCobro += totalesAsignacion(a, precio).facturacion;
+        svcCobro += totalesAsignacion(a).facturacion;
       }
       let e = m.get(estId);
       if (!e) {

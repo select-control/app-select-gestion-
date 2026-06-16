@@ -104,6 +104,9 @@ export async function actualizarServicio(
     .eq("id", id);
   if (error) return { ok: false, error: error.message };
 
+  // El precio o el cliente pueden haber cambiado: re-fija el precio de cada asignacion.
+  await repreciarServicio(supabase, id);
+
   revalidar();
   return { ok: true };
 }
@@ -134,6 +137,49 @@ async function resolverCosteHora(
   return Number(data?.tarifa_hora) || 0;
 }
 
+/**
+ * Precio/hora que se cobra al cliente por un puesto, segun su cargo.
+ * Prioridad: precio especial del servicio > tarifa del cliente para ese cargo > tarifa general.
+ */
+async function resolverPrecioCliente(
+  supabase: ReturnType<typeof createClient>,
+  servicio_id: string,
+  cargo_id: string | null
+): Promise<number> {
+  const { data: s } = await supabase
+    .from("servicios")
+    .select("precio_especial, establecimiento_id")
+    .eq("id", servicio_id)
+    .single();
+  if (!s) return 0;
+  if (s.precio_especial && Number(s.precio_especial) > 0) return Number(s.precio_especial);
+  const { data: e } = await supabase
+    .from("establecimientos")
+    .select("tarifa_hora_cliente, tarifas_cliente")
+    .eq("id", s.establecimiento_id)
+    .single();
+  if (!e) return 0;
+  const tarifas = (e.tarifas_cliente as Record<string, number> | null) || {};
+  const porCargo = cargo_id ? tarifas[cargo_id] : undefined;
+  if (porCargo != null && Number(porCargo) > 0) return Number(porCargo);
+  return Number(e.tarifa_hora_cliente) || 0;
+}
+
+/** Re-fija el precio de cliente de todas las asignaciones de un servicio (al editar precio/cliente). */
+async function repreciarServicio(
+  supabase: ReturnType<typeof createClient>,
+  servicio_id: string
+): Promise<void> {
+  const { data: asigs } = await supabase
+    .from("asignaciones")
+    .select("id, cargo_id")
+    .eq("servicio_id", servicio_id);
+  for (const a of asigs ?? []) {
+    const precio = await resolverPrecioCliente(supabase, servicio_id, a.cargo_id);
+    await supabase.from("asignaciones").update({ precio_hora_cliente: precio }).eq("id", a.id);
+  }
+}
+
 export async function crearAsignacion(payload: {
   servicio_id: string;
   trabajador_id: string | null;
@@ -151,6 +197,11 @@ export async function crearAsignacion(payload: {
     return { ok: false, error: "Indica hora de inicio y fin." };
 
   const coste_hora = await resolverCosteHora(supabase, payload.cargo_id);
+  const precio_hora_cliente = await resolverPrecioCliente(
+    supabase,
+    payload.servicio_id,
+    payload.cargo_id
+  );
 
   const { error } = await supabase.from("asignaciones").insert({
     servicio_id: payload.servicio_id,
@@ -163,6 +214,7 @@ export async function crearAsignacion(payload: {
     horas_extra: payload.horas_extra || 0,
     precio_hora_extra: payload.precio_hora_extra || 0,
     coste_hora,
+    precio_hora_cliente,
     extras: payload.extras || 0,
   });
   if (error) return { ok: false, error: error.message };

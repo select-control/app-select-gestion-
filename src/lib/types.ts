@@ -34,7 +34,8 @@ export interface Establecimiento {
   direccion: string | null;
   delegacion: string | null;
   email: string | null;
-  tarifa_hora_cliente: number;
+  tarifa_hora_cliente: number; // tarifa general (fallback si un cargo no tiene precio propio)
+  tarifas_cliente: Record<string, number>; // { cargo_id: precio_hora que se cobra al cliente }
   activo: boolean;
   created_at: string;
 }
@@ -70,6 +71,7 @@ export interface Asignacion {
   horas_extra: number; // horas extra (overtime)
   precio_hora_extra: number; // €/h que se paga al trabajador por hora extra (manual)
   coste_hora: number;
+  precio_hora_cliente: number; // €/h que se cobra al cliente por ESTE puesto (snapshot segun el cargo)
   extras: number; // plus/dietas/kilometraje en € (suelto)
   created_at: string;
 }
@@ -130,27 +132,32 @@ export interface UsuarioApp {
 // Calculos de dinero. Se calculan al vuelo, nunca se guardan.
 // ----------------------------------------------------------------------------
 
-/** Precio/hora que se aplica al cliente: el especial si existe, si no el estandar. */
-export function precioAplicado(
-  s: Pick<Servicio, "precio_hora_cliente" | "precio_especial">
+/**
+ * Precio/hora que se cobra al cliente por un puesto, segun su cargo.
+ * Prioridad: precio especial del servicio > tarifa del cliente para ese cargo > tarifa general del cliente.
+ */
+export function precioClientePorCargo(
+  cliente: Pick<Establecimiento, "tarifa_hora_cliente" | "tarifas_cliente">,
+  cargo_id: string | null,
+  precio_especial?: number | null
 ): number {
-  return s.precio_especial != null && s.precio_especial > 0
-    ? s.precio_especial
-    : s.precio_hora_cliente || 0;
+  if (precio_especial != null && precio_especial > 0) return precio_especial;
+  const porCargo = cargo_id ? cliente.tarifas_cliente?.[cargo_id] : undefined;
+  if (porCargo != null && porCargo > 0) return porCargo;
+  return cliente.tarifa_hora_cliente || 0;
 }
 
 export interface TotalesAsignacion {
   coste: number; // horas * coste_hora + extras
-  facturacion: number; // horas * precio aplicado
+  facturacion: number; // horas * precio del cliente para este puesto
   beneficio: number; // facturacion - coste
 }
 
 export function totalesAsignacion(
   a: Pick<
     Asignacion,
-    "horas" | "horas_extra" | "precio_hora_extra" | "coste_hora" | "extras"
-  >,
-  precioHora: number
+    "horas" | "horas_extra" | "precio_hora_extra" | "coste_hora" | "extras" | "precio_hora_cliente"
+  >
 ): TotalesAsignacion {
   const horasNormales = a.horas || 0;
   const horasExtra = a.horas_extra || 0;
@@ -159,23 +166,22 @@ export function totalesAsignacion(
     horasNormales * (a.coste_hora || 0) +
     horasExtra * (a.precio_hora_extra || 0) +
     (a.extras || 0);
-  // Facturación: el cliente paga TODAS las horas trabajadas (normales + extra).
-  const facturacion = (horasNormales + horasExtra) * (precioHora || 0);
+  // Facturación: el cliente paga TODAS las horas trabajadas (normales + extra)
+  // al precio fijado para el cargo de este puesto.
+  const facturacion = (horasNormales + horasExtra) * (a.precio_hora_cliente || 0);
   return { coste, facturacion, beneficio: facturacion - coste };
 }
 
 /** Suma de coste, facturacion, beneficio, horas y margen de un servicio. */
 export function totalesServicio(
-  servicio: Pick<Servicio, "precio_hora_cliente" | "precio_especial">,
   asignaciones: Pick<
     Asignacion,
-    "horas" | "horas_extra" | "precio_hora_extra" | "coste_hora" | "extras"
+    "horas" | "horas_extra" | "precio_hora_extra" | "coste_hora" | "extras" | "precio_hora_cliente"
   >[]
 ): TotalesAsignacion & { margen: number; horas: number } {
-  const precio = precioAplicado(servicio);
   const t = asignaciones.reduce(
     (acc, a) => {
-      const x = totalesAsignacion(a, precio);
+      const x = totalesAsignacion(a);
       acc.coste += x.coste;
       acc.facturacion += x.facturacion;
       acc.beneficio += x.beneficio;

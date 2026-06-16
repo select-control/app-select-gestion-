@@ -51,7 +51,7 @@ export default async function ComprobanteClientePage({
 
   const servicios = (servData as ServicioConRelaciones[]) ?? [];
   const filas = servicios.map((s) => {
-    const t = totalesServicio(s, s.asignaciones ?? []);
+    const t = totalesServicio(s.asignaciones ?? []);
     return { s, horas: t.horas, facturacion: t.facturacion, vigilantes: s.asignaciones?.length ?? 0 };
   });
   const totalHoras = filas.reduce((a, f) => a + f.horas, 0);

@@ -75,7 +75,7 @@ export default async function DashboardPage() {
   const porTrabajador = new Map<string, number>();
 
   for (const s of servicios) {
-    const t = totalesServicio(s, s.asignaciones ?? []);
+    const t = totalesServicio(s.asignaciones ?? []);
     coste += t.coste;
     facturacion += t.facturacion;
     totalHoras += t.horas;

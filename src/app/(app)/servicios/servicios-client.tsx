@@ -14,7 +14,6 @@ import { formatoEuros, formatoHoras, calcularHoras } from "@/lib/utils";
 import {
   totalesServicio,
   totalesAsignacion,
-  precioAplicado,
   type Rol,
   type ServicioConRelaciones,
   type Establecimiento,
@@ -143,7 +142,7 @@ export function ServiciosClient({
               <th className="px-2.5 py-2.5 font-medium">Horario</th>
               <th className="px-2.5 py-2.5 font-medium">Vigilantes</th>
               <th className="px-2.5 py-2.5 font-medium">Estado</th>
-              {esAdmin && <th className="px-2.5 py-2.5 font-medium">Precio aplicado</th>}
+              {esAdmin && <th className="px-2.5 py-2.5 font-medium">Precio especial</th>}
               <th className="px-2.5 py-2.5 font-medium">Horas fact.</th>
               {esAdmin && <th className="px-2.5 py-2.5 font-medium">Facturación</th>}
               {esAdmin && <th className="px-2.5 py-2.5 font-medium">Coste total</th>}
@@ -164,7 +163,7 @@ export function ServiciosClient({
             {servicios.map((s) => {
               const asignados = s.asignaciones?.length ?? 0;
               const faltan = s.puestos_necesarios - asignados;
-              const t = totalesServicio(s, s.asignaciones ?? []);
+              const t = totalesServicio(s.asignaciones ?? []);
               return (
                 <tr
                   key={s.id}
@@ -191,7 +190,7 @@ export function ServiciosClient({
                       {s.estado}
                     </span>
                   </td>
-                  {esAdmin && <td className="px-2.5 py-2.5 text-slate-600">{formatoEuros(precioAplicado(s))}</td>}
+                  {esAdmin && <td className="px-2.5 py-2.5 text-slate-600">{s.precio_especial && s.precio_especial > 0 ? formatoEuros(s.precio_especial) : "por cargo"}</td>}
                   <td className="px-2.5 py-2.5 text-slate-600">{formatoHoras(t.horas)}</td>
                   {esAdmin && <td className="px-2.5 py-2.5">{formatoEuros(t.facturacion)}</td>}
                   {esAdmin && <td className="px-2.5 py-2.5 text-slate-600">{formatoEuros(t.coste)}</td>}
@@ -393,8 +392,6 @@ function DetalleAsignaciones({
   const costePrevio =
     horasPrevia * (cargoSel?.tarifa_hora ?? 0) +
     (Number(horasExtra) || 0) * (Number(precioHoraExtra) || 0);
-  const precio = precioAplicado(servicio);
-
   function anadir() {
     setError(null);
     startTransition(async () => {
@@ -427,7 +424,7 @@ function DetalleAsignaciones({
     });
   }
 
-  const totales = totalesServicio(servicio, servicio.asignaciones ?? []);
+  const totales = totalesServicio(servicio.asignaciones ?? []);
   const faltan = servicio.puestos_necesarios - asignados;
 
   return (
@@ -471,7 +468,7 @@ function DetalleAsignaciones({
                 ?.slice()
                 .sort((a, b) => a.hueco - b.hueco)
                 .map((a) => {
-                  const ta = totalesAsignacion(a, precio);
+                  const ta = totalesAsignacion(a);
                   return (
                     <tr key={a.id} className="text-slate-800">
                       <td className="px-3 py-2">{a.hueco}</td>
