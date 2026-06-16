@@ -69,28 +69,45 @@ export function ContratosClient({
 
   const [subiendo, startSubir] = useTransition();
   const [docError, setDocError] = useState<string | null>(null);
+  // Archivos elegidos antes de guardar un contrato nuevo (se suben al crear).
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!estado.ok) return;
     if (estado.id) {
-      // Contrato recién creado: pasamos a modo edición (sin cerrar) para que
-      // aparezca el botón de adjuntar documentos al momento.
-      setEditandoId(estado.id);
-      router.refresh();
+      // Contrato recién creado: pasamos a modo edición (sin cerrar) y subimos
+      // los archivos que se eligieron antes de guardar.
+      const nuevoId = estado.id;
+      setEditandoId(nuevoId);
+      const files = pendingFiles;
+      setPendingFiles([]);
+      startSubir(async () => {
+        for (const f of files) {
+          const fd = new FormData();
+          fd.set("id", nuevoId);
+          fd.set("archivo", f);
+          const res = await subirDocumentoContrato(fd);
+          if (!res.ok) setDocError(res.error || "No se pudo subir un archivo.");
+        }
+        router.refresh();
+      });
     } else {
       setModal(false);
     }
-  }, [estado, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estado]);
 
   function abrirNuevo() {
     setEditandoId(null);
     setDocError(null);
+    setPendingFiles([]);
     setModal(true);
   }
   function abrirEditar(c: ContratoConRelaciones) {
     setEditandoId(c.id);
     setDocError(null);
+    setPendingFiles([]);
     setModal(true);
   }
 
@@ -101,15 +118,21 @@ export function ContratosClient({
   }
 
   function onElegirArchivo(file: File | null) {
-    if (!file || !editandoId) return;
+    if (!file) return;
     setDocError(null);
+    if (fileRef.current) fileRef.current.value = "";
+    // Contrato nuevo (aún sin guardar): se queda en espera y se sube al guardar.
+    if (!editandoId) {
+      setPendingFiles((prev) => [...prev, file]);
+      return;
+    }
+    // Contrato existente: se sube ya.
     const fd = new FormData();
     fd.set("id", editandoId);
     fd.set("archivo", file);
     startSubir(async () => {
       const res = await subirDocumentoContrato(fd);
       if (!res.ok) setDocError(res.error || "No se pudo subir.");
-      if (fileRef.current) fileRef.current.value = "";
       router.refresh();
     });
   }
@@ -246,49 +269,73 @@ export function ContratosClient({
         <div className="mt-6 border-t border-slate-200 pt-5">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-900">Documentos del contrato</h3>
-            {editandoId && (
-              <>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic,.webp,image/*,application/pdf"
-                  onChange={(e) => onElegirArchivo(e.target.files?.[0] ?? null)}
-                />
-                <Button type="button" variant="secondary" disabled={subiendo} onClick={() => fileRef.current?.click()}>
-                  <Paperclip className="h-4 w-4" /> {subiendo ? "Subiendo..." : "Adjuntar"}
-                </Button>
-              </>
-            )}
+            <>
+              <input
+                ref={fileRef}
+                type="file"
+                className="hidden"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic,.webp,image/*,application/pdf"
+                onChange={(e) => onElegirArchivo(e.target.files?.[0] ?? null)}
+              />
+              <Button type="button" variant="secondary" disabled={subiendo} onClick={() => fileRef.current?.click()}>
+                <Paperclip className="h-4 w-4" /> {subiendo ? "Subiendo..." : "Adjuntar"}
+              </Button>
+            </>
           </div>
 
-          {!editandoId ? (
-            <p className="text-sm text-slate-400">Guarda el contrato primero para poder adjuntar documentos.</p>
-          ) : (editando?.documentos?.length ?? 0) === 0 ? (
-            <p className="text-sm text-slate-400">Sin documentos. Adjunta el contrato, anexos o imágenes (PDF, Word, fotos).</p>
+          {editandoId ? (
+            (editando?.documentos?.length ?? 0) === 0 ? (
+              <p className="text-sm text-slate-400">Sin documentos. Adjunta el contrato, anexos o imágenes (PDF, Word, fotos).</p>
+            ) : (
+              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+                {(editando?.documentos ?? []).map((d) => (
+                  <li key={d.path} className="flex items-center justify-between px-3 py-2 text-sm">
+                    <button
+                      type="button"
+                      onClick={() => onVerDoc(d.path)}
+                      className="flex min-w-0 items-center gap-2 text-left text-slate-700 hover:text-brand"
+                    >
+                      <FileText className="h-4 w-4 shrink-0 text-slate-400" />
+                      <span className="truncate underline-offset-2 hover:underline">{d.nombre}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onBorrarDoc(d.path)}
+                      title="Borrar documento"
+                      className="ml-2 shrink-0 text-slate-400 hover:text-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )
+          ) : pendingFiles.length === 0 ? (
+            <p className="text-sm text-slate-400">
+              Adjunta el contrato, anexos o imágenes (PDF, Word, fotos). Se subirán al pulsar “Guardar”.
+            </p>
           ) : (
-            <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200">
-              {(editando?.documentos ?? []).map((d) => (
-                <li key={d.path} className="flex items-center justify-between px-3 py-2 text-sm">
-                  <button
-                    type="button"
-                    onClick={() => onVerDoc(d.path)}
-                    className="flex min-w-0 items-center gap-2 text-left text-slate-700 hover:text-brand"
-                  >
-                    <FileText className="h-4 w-4 shrink-0 text-slate-400" />
-                    <span className="truncate underline-offset-2 hover:underline">{d.nombre}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onBorrarDoc(d.path)}
-                    title="Borrar documento"
-                    className="ml-2 shrink-0 text-slate-400 hover:text-red-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+                {pendingFiles.map((f, i) => (
+                  <li key={i} className="flex items-center justify-between px-3 py-2 text-sm">
+                    <span className="flex min-w-0 items-center gap-2 text-slate-700">
+                      <FileText className="h-4 w-4 shrink-0 text-slate-400" />
+                      <span className="truncate">{f.name}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPendingFiles((prev) => prev.filter((_, j) => j !== i))}
+                      title="Quitar"
+                      className="ml-2 shrink-0 text-slate-400 hover:text-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1.5 text-xs text-slate-400">Se subirán al pulsar “Guardar”.</p>
+            </>
           )}
           {docError && <p className="mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{docError}</p>}
         </div>
