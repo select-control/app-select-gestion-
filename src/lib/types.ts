@@ -86,6 +86,12 @@ export interface ServicioConRelaciones extends Servicio {
   asignaciones: AsignacionConRelaciones[];
 }
 
+export interface DocumentoContrato {
+  path: string;
+  nombre: string;
+  tipo: string | null;
+}
+
 export interface Contrato {
   id: string;
   numero: string | null;
@@ -94,6 +100,7 @@ export interface Contrato {
   fecha_fin: string | null;
   firmado: boolean;
   notas: string | null;
+  documentos: DocumentoContrato[];
   created_at: string;
 }
 

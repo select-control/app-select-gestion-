@@ -92,6 +92,19 @@ export function ServiciosClient({
   const [detalleId, setDetalleId] = useState<string | null>(null);
   const [estIdForm, setEstIdForm] = useState("");
 
+  // Filtros (independientes): por cliente y por rango de fechas.
+  const [filtroCliente, setFiltroCliente] = useState("");
+  const [filtroDesde, setFiltroDesde] = useState("");
+  const [filtroHasta, setFiltroHasta] = useState("");
+
+  const serviciosFiltrados = servicios.filter((s) => {
+    if (filtroCliente && s.establecimiento_id !== filtroCliente) return false;
+    if (filtroDesde && s.fecha < filtroDesde) return false;
+    if (filtroHasta && s.fecha > filtroHasta) return false;
+    return true;
+  });
+  const hayFiltro = !!(filtroCliente || filtroDesde || filtroHasta);
+
   const accion = editando ? actualizarServicio : crearServicio;
   const [estado, formAction] = useFormState(accion, estadoInicial);
 
@@ -126,11 +139,44 @@ export function ServiciosClient({
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Servicios</h1>
-          <p className="text-sm text-slate-500">{servicios.length} en total</p>
+          <p className="text-sm text-slate-500">
+            {hayFiltro
+              ? `${serviciosFiltrados.length} de ${servicios.length}`
+              : `${servicios.length} en total`}
+          </p>
         </div>
         <Button onClick={abrirNuevo}>
           <Plus className="h-4 w-4" /> Nuevo servicio
         </Button>
+      </div>
+
+      {/* Filtros: por cliente y por fecha, independientes */}
+      <div className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-3">
+        <div className="min-w-[200px] flex-1">
+          <Label htmlFor="f_cliente">Cliente</Label>
+          <Select id="f_cliente" value={filtroCliente} onChange={(e) => setFiltroCliente(e.target.value)}>
+            <option value="">Todos los clientes</option>
+            {establecimientos.map((e) => (
+              <option key={e.id} value={e.id}>{e.nombre}</option>
+            ))}
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="f_desde">Desde</Label>
+          <Input id="f_desde" type="date" value={filtroDesde} onChange={(e) => setFiltroDesde(e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="f_hasta">Hasta</Label>
+          <Input id="f_hasta" type="date" value={filtroHasta} onChange={(e) => setFiltroHasta(e.target.value)} />
+        </div>
+        {hayFiltro && (
+          <Button
+            variant="secondary"
+            onClick={() => { setFiltroCliente(""); setFiltroDesde(""); setFiltroHasta(""); }}
+          >
+            Limpiar
+          </Button>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
@@ -153,14 +199,16 @@ export function ServiciosClient({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {servicios.length === 0 && (
+            {serviciosFiltrados.length === 0 && (
               <tr>
                 <td colSpan={esAdmin ? 13 : 8} className="px-4 py-10 text-center text-slate-400">
-                  No hay servicios todavia. Crea el primero con &quot;Nuevo servicio&quot;.
+                  {hayFiltro
+                    ? "Ningún servicio coincide con los filtros."
+                    : "No hay servicios todavia. Crea el primero con “Nuevo servicio”."}
                 </td>
               </tr>
             )}
-            {servicios.map((s) => {
+            {serviciosFiltrados.map((s) => {
               const asignados = s.asignaciones?.length ?? 0;
               const faltan = s.puestos_necesarios - asignados;
               const t = totalesServicio(s.asignaciones ?? []);

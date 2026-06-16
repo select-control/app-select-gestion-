@@ -2,19 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Pencil, Trash2, Plus, Search, FileText } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, FileText, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/card";
 import { formatoEuros } from "@/lib/utils";
-import type { Rol, Establecimiento, Cargo } from "@/lib/types";
+import type { Rol, Establecimiento, Cargo, ContratoConRelaciones } from "@/lib/types";
 import {
   crearEstablecimiento,
   actualizarEstablecimiento,
   borrarEstablecimiento,
   type ResultadoAccion,
 } from "./actions";
+import { urlDocumentoContrato } from "../contratos/actions";
 
 const estadoInicial: ResultadoAccion = { ok: false };
 
@@ -30,10 +31,12 @@ function BotonGuardar() {
 export function EstablecimientosClient({
   establecimientos,
   cargos,
+  contratos,
   rol,
 }: {
   establecimientos: Establecimiento[];
   cargos: Cargo[];
+  contratos: ContratoConRelaciones[];
   rol: Rol;
 }) {
   const esAdmin = rol === "admin";
@@ -52,6 +55,12 @@ export function EstablecimientosClient({
     if (!confirm(`¿Borrar el establecimiento "${e.nombre}"?`)) return;
     const res = await borrarEstablecimiento(e.id);
     if (!res.ok) alert(res.error);
+  }
+
+  async function verDoc(path: string) {
+    const res = await urlDocumentoContrato(path);
+    if (res.url) window.open(res.url, "_blank", "noreferrer");
+    else alert(res.error || "No se pudo abrir el documento.");
   }
 
   const filtrados = establecimientos.filter((e) => {
@@ -99,6 +108,7 @@ export function EstablecimientosClient({
               <th className="px-4 py-3 font-medium">Delegacion</th>
               <th className="px-4 py-3 font-medium">CIF</th>
               {esAdmin && <th className="px-4 py-3 font-medium">Tarifa general/hora</th>}
+              <th className="px-4 py-3 font-medium">Contrato</th>
               <th className="px-4 py-3 font-medium">Estado</th>
               <th className="px-4 py-3 text-right font-medium">Acciones</th>
             </tr>
@@ -106,7 +116,7 @@ export function EstablecimientosClient({
           <tbody className="divide-y divide-slate-200 bg-white">
             {filtrados.length === 0 && (
               <tr>
-                <td colSpan={esAdmin ? 6 : 5} className="px-4 py-10 text-center text-slate-400">
+                <td colSpan={esAdmin ? 7 : 6} className="px-4 py-10 text-center text-slate-400">
                   No hay establecimientos que mostrar.
                 </td>
               </tr>
@@ -124,6 +134,31 @@ export function EstablecimientosClient({
                 {esAdmin && (
                   <td className="px-4 py-3">{formatoEuros(e.tarifa_hora_cliente)}</td>
                 )}
+                <td className="px-4 py-3">
+                  {(() => {
+                    const ctrs = contratos.filter((c) => c.establecimiento_id === e.id);
+                    if (ctrs.length === 0) return <span className="text-slate-300">—</span>;
+                    return (
+                      <div className="flex flex-col gap-1">
+                        {ctrs.map((c) => (
+                          <div key={c.id} className="flex items-center gap-1.5">
+                            <span className="text-slate-700">{c.numero || "Contrato"}</span>
+                            {(c.documentos?.length ?? 0) > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => verDoc(c.documentos[0].path)}
+                                title={c.documentos[0].nombre}
+                                className="inline-flex items-center gap-0.5 text-xs text-brand hover:underline"
+                              >
+                                <Paperclip className="h-3 w-3" /> ver
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </td>
                 <td className="px-4 py-3">
                   <Badge activo={e.activo}>{e.activo ? "Activo" : "Inactivo"}</Badge>
                 </td>
