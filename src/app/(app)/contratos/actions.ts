@@ -12,9 +12,6 @@ function leerFormulario(formData: FormData) {
     fecha_inicio: String(formData.get("fecha_inicio") || "").trim() || null,
     fecha_fin: String(formData.get("fecha_fin") || "").trim() || null,
     firmado: formData.get("firmado") === "on" || formData.get("firmado") === "true",
-    segurpri: formData.get("segurpri") === "on" || formData.get("segurpri") === "true",
-    via_publica: formData.get("via_publica") === "on" || formData.get("via_publica") === "true",
-    aprobado: formData.get("aprobado") === "on" || formData.get("aprobado") === "true",
     notas: String(formData.get("notas") || "").trim() || null,
   };
 }

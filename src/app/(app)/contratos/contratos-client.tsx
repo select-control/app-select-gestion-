@@ -90,15 +90,12 @@ export function ContratosClient({
               <th className="px-3 py-3 font-medium">Inicio</th>
               <th className="px-3 py-3 font-medium">Fin</th>
               <th className="px-3 py-3 text-center font-medium">Firmado</th>
-              <th className="px-3 py-3 text-center font-medium">Segurpri</th>
-              <th className="px-3 py-3 text-center font-medium">Vía pública</th>
-              <th className="px-3 py-3 text-center font-medium">Aprobado</th>
               <th className="px-3 py-3 text-right font-medium">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
             {contratos.length === 0 && (
-              <tr><td colSpan={9} className="px-4 py-10 text-center text-slate-400">No hay contratos todavia.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-400">No hay contratos todavia.</td></tr>
             )}
             {contratos.map((c) => (
               <tr key={c.id} className="text-slate-800 hover:bg-slate-50">
@@ -107,9 +104,6 @@ export function ContratosClient({
                 <td className="whitespace-nowrap px-3 py-3 text-slate-500">{fechaBonita(c.fecha_inicio)}</td>
                 <td className="whitespace-nowrap px-3 py-3 text-slate-500">{fechaBonita(c.fecha_fin)}</td>
                 <td className="px-3 py-3"><div className="flex justify-center"><Si v={c.firmado} /></div></td>
-                <td className="px-3 py-3"><div className="flex justify-center"><Si v={c.segurpri} /></div></td>
-                <td className="px-3 py-3"><div className="flex justify-center"><Si v={c.via_publica} /></div></td>
-                <td className="px-3 py-3"><div className="flex justify-center"><Si v={c.aprobado} /></div></td>
                 <td className="px-3 py-3">
                   <div className="flex justify-end gap-1">
                     <Button variant="ghost" size="sm" onClick={() => { setEditando(c); setModal(true); }}>
@@ -157,9 +151,6 @@ export function ContratosClient({
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               ["firmado", "Firmado"],
-              ["segurpri", "Segurpri"],
-              ["via_publica", "Vía pública"],
-              ["aprobado", "Aprobado"],
             ].map(([name, label]) => (
               <label key={name} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
                 <input

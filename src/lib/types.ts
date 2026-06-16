@@ -93,9 +93,6 @@ export interface Contrato {
   fecha_inicio: string | null;
   fecha_fin: string | null;
   firmado: boolean;
-  segurpri: boolean;
-  via_publica: boolean;
-  aprobado: boolean;
   notas: string | null;
   created_at: string;
 }
