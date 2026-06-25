@@ -55,7 +55,7 @@ function StatCard({
 export default async function DashboardPage() {
   const supabase = await createClient();
   const usuario = await getUsuarioActual();
-  const esAdmin = usuario?.rol === "admin";
+  const esAdmin = true; // encargado ve el panel economico igual que el admin
 
   const ahora = new Date();
   const desde = format(startOfYear(ahora), "yyyy-MM-dd");

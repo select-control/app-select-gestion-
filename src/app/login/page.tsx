@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/logo";
+import { registrarConexion } from "./actions";
 
 type Modo = "login" | "recuperar";
 
@@ -28,6 +29,13 @@ export default function LoginPage() {
       setError("Email o contrasena incorrectos.");
       setCargando(false);
       return;
+    }
+
+    // Registrar la conexion en el panel de control (no bloquea el acceso si falla).
+    try {
+      await registrarConexion();
+    } catch {
+      /* ignorar: el registro es secundario */
     }
 
     router.push("/dashboard");

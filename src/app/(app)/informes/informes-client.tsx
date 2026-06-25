@@ -318,11 +318,7 @@ export function InformesClient({
         </div>
       )}
 
-      {rol !== "admin" && (
-        <p className="mt-4 text-xs text-slate-400">
-          Algunos importes solo los ve el administrador.
-        </p>
-      )}
+      
     </div>
   );
 }

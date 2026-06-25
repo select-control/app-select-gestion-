@@ -39,7 +39,8 @@ export function EstablecimientosClient({
   contratos: ContratoConRelaciones[];
   rol: Rol;
 }) {
-  const esAdmin = rol === "admin";
+  // Todos los roles ven/editan lo economico; solo /usuarios y /actividad son admin-only.
+  const esAdmin = true;
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState<Establecimiento | null>(null);
   const [busqueda, setBusqueda] = useState("");

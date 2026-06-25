@@ -13,6 +13,7 @@ import {
   FileSignature,
   Wallet,
   Lock,
+  Activity,
   LogOut,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +31,7 @@ const navItems = [
   { href: "/cargos", label: "Cargos", icon: BadgeEuro, soloAdmin: false },
   { href: "/informes", label: "Pagos y cobros", icon: FileBarChart, soloAdmin: false },
   { href: "/usuarios", label: "Usuarios", icon: ShieldCheck, soloAdmin: true },
+  { href: "/actividad", label: "Panel de control", icon: Activity, soloAdmin: true },
   { href: "/seguridad", label: "Seguridad", icon: Lock, soloAdmin: false },
 ];
 
