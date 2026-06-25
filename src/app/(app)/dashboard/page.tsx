@@ -53,7 +53,7 @@ function StatCard({
 }
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const usuario = await getUsuarioActual();
   const esAdmin = usuario?.rol === "admin";
 

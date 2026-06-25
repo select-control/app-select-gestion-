@@ -10,7 +10,7 @@ export async function getUsuarioActual(): Promise<{
   perfil: UsuarioApp | null;
   rol: Rol;
 } | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

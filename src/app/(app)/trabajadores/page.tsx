@@ -6,7 +6,7 @@ import type { TrabajadorConCargo, Cargo } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function TrabajadoresPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const usuario = await getUsuarioActual();
 
   const [trabajadoresRes, cargosRes] = await Promise.all([

@@ -11,7 +11,7 @@ import type {
 export const dynamic = "force-dynamic";
 
 export default async function ServiciosPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const usuario = await getUsuarioActual();
 
   const [serviciosRes, establecimientosRes, trabajadoresRes, cargosRes] =

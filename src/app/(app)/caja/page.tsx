@@ -6,7 +6,7 @@ import type { MovimientoCaja, Garantia, ServicioConRelaciones } from "@/lib/type
 export const dynamic = "force-dynamic";
 
 export default async function CajaPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const usuario = await getUsuarioActual();
 
   const [movRes, garRes, srvRes] = await Promise.all([

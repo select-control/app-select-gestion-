@@ -37,7 +37,7 @@ export async function crearContrato(
 ): Promise<ResultadoAccion> {
   const noAuth = await requiereSesion();
   if (noAuth) return { ok: false, error: noAuth };
-  const supabase = createClient();
+  const supabase = await createClient();
   const datos = leerFormulario(formData);
   const { data, error } = await supabase.from("contratos").insert(datos).select("id").single();
   if (error) return { ok: false, error: error.message };
@@ -52,7 +52,7 @@ export async function actualizarContrato(
 ): Promise<ResultadoAccion> {
   const noAuth = await requiereSesion();
   if (noAuth) return { ok: false, error: noAuth };
-  const supabase = createClient();
+  const supabase = await createClient();
   const id = String(formData.get("id") || "");
   if (!id) return { ok: false, error: "Falta el identificador." };
   const { error } = await supabase.from("contratos").update(leerFormulario(formData)).eq("id", id);
@@ -64,7 +64,7 @@ export async function actualizarContrato(
 export async function borrarContrato(id: string): Promise<ResultadoAccion> {
   const noAuth = await requiereSesion();
   if (noAuth) return { ok: false, error: noAuth };
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("contratos").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/contratos");

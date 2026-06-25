@@ -6,7 +6,7 @@ import type { Establecimiento, Cargo, ContratoConRelaciones } from "@/lib/types"
 export const dynamic = "force-dynamic";
 
 export default async function EstablecimientosPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const usuario = await getUsuarioActual();
 
   const [estRes, cargosRes, contratosRes] = await Promise.all([

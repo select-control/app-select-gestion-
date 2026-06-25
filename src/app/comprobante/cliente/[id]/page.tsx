@@ -23,28 +23,30 @@ export default async function ComprobanteClientePage({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: { desde?: string; hasta?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ desde?: string; hasta?: string }>;
 }) {
   const usuario = await getUsuarioActual();
   if (!usuario) redirect("/login");
 
+  const { id } = await params;
+  const sp = await searchParams;
   const ahora = new Date();
-  const desde = searchParams.desde || format(startOfMonth(ahora), "yyyy-MM-dd");
-  const hasta = searchParams.hasta || format(endOfMonth(ahora), "yyyy-MM-dd");
+  const desde = sp.desde || format(startOfMonth(ahora), "yyyy-MM-dd");
+  const hasta = sp.hasta || format(endOfMonth(ahora), "yyyy-MM-dd");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: est } = await supabase
     .from("establecimientos")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
   if (!est) notFound();
 
   const { data: servData } = await supabase
     .from("servicios")
     .select("*, establecimientos(nombre, tarifa_hora_cliente), asignaciones(*, trabajadores(nombre), cargos(nombre))")
-    .eq("establecimiento_id", params.id)
+    .eq("establecimiento_id", id)
     .gte("fecha", desde)
     .lte("fecha", hasta)
     .order("fecha", { ascending: true });

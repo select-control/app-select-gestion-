@@ -19,7 +19,7 @@ export async function crearMovimiento(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const datos = leerMovimiento(formData);
   if (!datos.fecha) return { ok: false, error: "Indica la fecha." };
   const { error } = await supabase.from("caja_movimientos").insert(datos);
@@ -32,7 +32,7 @@ export async function actualizarMovimiento(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const id = String(formData.get("id") || "");
   if (!id) return { ok: false, error: "Falta el identificador." };
   const { error } = await supabase.from("caja_movimientos").update(leerMovimiento(formData)).eq("id", id);
@@ -42,7 +42,7 @@ export async function actualizarMovimiento(
 }
 
 export async function borrarMovimiento(id: string): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("caja_movimientos").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/caja");
@@ -63,7 +63,7 @@ export async function crearGarantia(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("garantias").insert(leerGarantia(formData));
   if (error) return { ok: false, error: error.message };
   revalidatePath("/caja");
@@ -74,7 +74,7 @@ export async function actualizarGarantia(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const id = String(formData.get("id") || "");
   if (!id) return { ok: false, error: "Falta el identificador." };
   const { error } = await supabase.from("garantias").update(leerGarantia(formData)).eq("id", id);
@@ -84,7 +84,7 @@ export async function actualizarGarantia(
 }
 
 export async function borrarGarantia(id: string): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("garantias").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/caja");
@@ -96,7 +96,7 @@ export async function marcarCobrado(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const id = String(formData.get("id") || "");
   const forma = String(formData.get("forma_cobro") || "");
   const fecha = String(formData.get("fecha_cobro") || "").trim() || null;
@@ -115,7 +115,7 @@ export async function marcarCobrado(
 }
 
 export async function desmarcarCobrado(id: string): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("servicios")
     .update({ cobrado: false, forma_cobro: null, fecha_cobro: null })

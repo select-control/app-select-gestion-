@@ -19,7 +19,7 @@ export async function crearTrabajador(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const datos = leerFormulario(formData);
 
   if (!datos.nombre) {
@@ -37,7 +37,7 @@ export async function actualizarTrabajador(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const id = String(formData.get("id") || "");
   const datos = leerFormulario(formData);
 
@@ -51,7 +51,7 @@ export async function actualizarTrabajador(
 }
 
 export async function borrarTrabajador(id: string): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("trabajadores").delete().eq("id", id);
 
   if (error) {

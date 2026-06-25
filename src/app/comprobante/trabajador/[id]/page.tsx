@@ -22,28 +22,30 @@ export default async function ComprobanteTrabajadorPage({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: { desde?: string; hasta?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ desde?: string; hasta?: string }>;
 }) {
   const usuario = await getUsuarioActual();
   if (!usuario) redirect("/login");
 
+  const { id } = await params;
+  const sp = await searchParams;
   const ahora = new Date();
-  const desde = searchParams.desde || format(startOfMonth(ahora), "yyyy-MM-dd");
-  const hasta = searchParams.hasta || format(endOfMonth(ahora), "yyyy-MM-dd");
+  const desde = sp.desde || format(startOfMonth(ahora), "yyyy-MM-dd");
+  const hasta = sp.hasta || format(endOfMonth(ahora), "yyyy-MM-dd");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: trab } = await supabase
     .from("trabajadores")
     .select("*, cargos(nombre)")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
   if (!trab) notFound();
 
   const { data: asigData } = await supabase
     .from("asignaciones")
     .select("*, servicios!inner(fecha, hora_inicio, hora_fin, establecimientos(nombre))")
-    .eq("trabajador_id", params.id)
+    .eq("trabajador_id", id)
     .gte("servicios.fecha", desde)
     .lte("servicios.fecha", hasta);
 

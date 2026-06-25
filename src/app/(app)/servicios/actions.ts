@@ -50,7 +50,7 @@ function validarServicio(d: ReturnType<typeof leerServicio>): string | null {
 
 /** Lee del establecimiento su tarifa estandar y su delegacion. */
 async function datosEstablecimiento(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   id: string
 ): Promise<{ tarifa: number; delegacion: string | null }> {
   const { data } = await supabase
@@ -68,7 +68,7 @@ export async function crearServicio(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const datos = leerServicio(formData);
   const err = validarServicio(datos);
   if (err) return { ok: false, error: err };
@@ -89,7 +89,7 @@ export async function actualizarServicio(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const id = String(formData.get("id") || "");
   const datos = leerServicio(formData);
 
@@ -112,7 +112,7 @@ export async function actualizarServicio(
 }
 
 export async function borrarServicio(id: string): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("servicios").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
 
@@ -125,7 +125,7 @@ export async function borrarServicio(id: string): Promise<ResultadoAccion> {
 // ----------------------------------------------------------------------------
 
 async function resolverCosteHora(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   cargo_id: string | null
 ): Promise<number> {
   if (!cargo_id) return 0;
@@ -142,7 +142,7 @@ async function resolverCosteHora(
  * Prioridad: precio especial del servicio > tarifa del cliente para ese cargo > tarifa general.
  */
 async function resolverPrecioCliente(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   servicio_id: string,
   cargo_id: string | null
 ): Promise<number> {
@@ -167,7 +167,7 @@ async function resolverPrecioCliente(
 
 /** Re-fija el precio de cliente de todas las asignaciones de un servicio (al editar precio/cliente). */
 async function repreciarServicio(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   servicio_id: string
 ): Promise<void> {
   const { data: asigs } = await supabase
@@ -191,7 +191,7 @@ export async function crearAsignacion(payload: {
   precio_hora_extra: number;
   extras: number;
 }): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   if (!payload.servicio_id) return { ok: false, error: "Falta el servicio." };
   if (!payload.hora_inicio || !payload.hora_fin)
     return { ok: false, error: "Indica hora de inicio y fin." };
@@ -224,7 +224,7 @@ export async function crearAsignacion(payload: {
 }
 
 export async function borrarAsignacion(id: string): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("asignaciones").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
 

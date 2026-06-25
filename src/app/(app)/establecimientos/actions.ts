@@ -31,7 +31,7 @@ export async function crearEstablecimiento(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const datos = leerFormulario(formData);
 
   if (!datos.nombre) {
@@ -49,7 +49,7 @@ export async function actualizarEstablecimiento(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const id = String(formData.get("id") || "");
   const datos = leerFormulario(formData);
 
@@ -66,7 +66,7 @@ export async function actualizarEstablecimiento(
 }
 
 export async function borrarEstablecimiento(id: string): Promise<ResultadoAccion> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("establecimientos").delete().eq("id", id);
 
   if (error) {

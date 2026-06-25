@@ -6,7 +6,7 @@ import type { Cargo } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function CargosPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const usuario = await getUsuarioActual();
 
   const { data } = await supabase
