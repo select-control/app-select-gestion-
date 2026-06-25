@@ -35,21 +35,45 @@ export async function updateSession(request: NextRequest) {
 
   const ruta = request.nextUrl.pathname;
   const esLogin = ruta.startsWith("/login");
-  // Rutas publicas (sin sesion): login y la pagina para fijar nueva contrasena.
-  const esPublica = esLogin || ruta.startsWith("/actualizar-clave");
+  const esActualizar = ruta.startsWith("/actualizar-clave");
+  const esVerificar = ruta.startsWith("/verificar-2fa");
+  // Rutas publicas (accesibles sin sesion iniciada): login y fijar nueva contrasena.
+  const esPublica = esLogin || esActualizar;
+
+  const redirigir = (pathname: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname;
+    return NextResponse.redirect(url);
+  };
 
   // Sin sesion y no esta en una ruta publica -> al login
   if (!user && !esPublica) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return redirigir("/login");
   }
 
-  // Con sesion y entra al login -> al dashboard
-  if (user && esLogin) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+  if (user) {
+    // ¿Tiene el usuario un 2FA activado que aun no ha verificado en esta sesion?
+    // currentLevel aal1 + nextLevel aal2 = hay factor pero falta meter el codigo.
+    let falta2FA = false;
+    try {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      falta2FA = aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2";
+    } catch {
+      // Si no se puede comprobar, no bloqueamos (evita dejar fuera al usuario).
+      falta2FA = false;
+    }
+
+    if (falta2FA) {
+      // Obligar a verificar antes de entrar a ninguna pantalla de la app.
+      if (!esVerificar && !esActualizar) {
+        return redirigir("/verificar-2fa");
+      }
+    } else {
+      // Sesion completa (aal2 o sin 2FA): no tiene sentido quedarse en login/verificar.
+      if (esLogin || esVerificar) {
+        return redirigir("/dashboard");
+      }
+    }
   }
 
   return supabaseResponse;

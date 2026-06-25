@@ -3,11 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getUsuarioActual } from "@/lib/auth";
 import type { DocumentoContrato } from "@/lib/types";
 
 export type ResultadoAccion = { ok: boolean; error?: string; id?: string };
 
 const BUCKET = "contratos";
+
+/**
+ * Exige que haya una sesion iniciada antes de ejecutar la accion.
+ * Imprescindible en las funciones que usan la clave admin (se saltan RLS):
+ * no podemos depender solo del middleware para protegerlas.
+ */
+async function requiereSesion(): Promise<string | null> {
+  const usuario = await getUsuarioActual();
+  return usuario ? null : "No autorizado.";
+}
 
 function leerFormulario(formData: FormData) {
   return {
@@ -24,6 +35,8 @@ export async function crearContrato(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
+  const noAuth = await requiereSesion();
+  if (noAuth) return { ok: false, error: noAuth };
   const supabase = createClient();
   const datos = leerFormulario(formData);
   const { data, error } = await supabase.from("contratos").insert(datos).select("id").single();
@@ -37,6 +50,8 @@ export async function actualizarContrato(
   _prev: ResultadoAccion,
   formData: FormData
 ): Promise<ResultadoAccion> {
+  const noAuth = await requiereSesion();
+  if (noAuth) return { ok: false, error: noAuth };
   const supabase = createClient();
   const id = String(formData.get("id") || "");
   if (!id) return { ok: false, error: "Falta el identificador." };
@@ -47,6 +62,8 @@ export async function actualizarContrato(
 }
 
 export async function borrarContrato(id: string): Promise<ResultadoAccion> {
+  const noAuth = await requiereSesion();
+  if (noAuth) return { ok: false, error: noAuth };
   const supabase = createClient();
   const { error } = await supabase.from("contratos").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
@@ -58,6 +75,8 @@ export async function borrarContrato(id: string): Promise<ResultadoAccion> {
 export async function subirDocumentoContrato(
   formData: FormData
 ): Promise<ResultadoAccion> {
+  const noAuth = await requiereSesion();
+  if (noAuth) return { ok: false, error: noAuth };
   const admin = createAdminClient();
   if (!admin) return { ok: false, error: "Almacenamiento no configurado." };
   const contratoId = String(formData.get("id") || "");
@@ -89,6 +108,8 @@ export async function borrarDocumentoContrato(
   contratoId: string,
   path: string
 ): Promise<ResultadoAccion> {
+  const noAuth = await requiereSesion();
+  if (noAuth) return { ok: false, error: noAuth };
   const admin = createAdminClient();
   if (!admin) return { ok: false, error: "Almacenamiento no configurado." };
   await admin.storage.from(BUCKET).remove([path]);
@@ -107,6 +128,8 @@ export async function borrarDocumentoContrato(
 export async function urlDocumentoContrato(
   path: string
 ): Promise<{ url?: string; error?: string }> {
+  const noAuth = await requiereSesion();
+  if (noAuth) return { error: noAuth };
   const admin = createAdminClient();
   if (!admin) return { error: "Almacenamiento no configurado." };
   const { data, error } = await admin.storage.from(BUCKET).createSignedUrl(path, 3600);

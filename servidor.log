@@ -928,3 +928,246 @@ Error: Could not find a production build in the '.next' directory. Try building 
 
  ✓ Starting...
  ✓ Ready in 114ms
+
+> select-control-app@1.0.0 start
+> next start
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 161ms
+
+> select-control-app@1.0.0 start
+> next start
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 6.5s
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+tg [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at t6 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43032)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async re (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:44031)
+    at async t7 (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:28:43687)
+    at async r (/Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26377)
+    at async /Users/adrifueyo/Sites/select-control-app/.next/server/chunks/548.js:41:26623 {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+
+> select-control-app@1.0.0 start
+> next start
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 541ms
+
+> select-control-app@1.0.0 start
+> next start
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 190ms
+
+> select-control-app@1.0.0 start
+> next start
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 130ms
