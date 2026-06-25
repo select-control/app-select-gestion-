@@ -113,8 +113,14 @@ export function ServiciosClient({
     establecimientos.find((e) => e.id === estIdForm)?.tarifa_hora_cliente ?? 0;
 
   useEffect(() => {
-    if (estado.ok) setModalServicio(false);
-  }, [estado]);
+    if (!estado.ok) return;
+    setModalServicio(false);
+    // Al CREAR un servicio (no al editar), abrimos directo su panel de trabajadores,
+    // para asignar operarios del tiron sin tener que volver a pinchar.
+    if (!editando && estado.id) {
+      setDetalleId(estado.id);
+    }
+  }, [estado]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function abrirNuevo() {
     setEditando(null);

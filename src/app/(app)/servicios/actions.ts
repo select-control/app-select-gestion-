@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { calcularHoras } from "@/lib/utils";
 
-export type ResultadoAccion = { ok: boolean; error?: string };
+export type ResultadoAccion = { ok: boolean; error?: string; id?: string };
 
 function revalidar() {
   revalidatePath("/servicios");
@@ -74,15 +74,20 @@ export async function crearServicio(
   if (err) return { ok: false, error: err };
 
   const est = await datosEstablecimiento(supabase, datos.establecimiento_id);
-  const { error } = await supabase.from("servicios").insert({
-    ...datos,
-    precio_hora_cliente: est.tarifa,
-    delegacion: est.delegacion,
-  });
+  const { data, error } = await supabase
+    .from("servicios")
+    .insert({
+      ...datos,
+      precio_hora_cliente: est.tarifa,
+      delegacion: est.delegacion,
+    })
+    .select("id")
+    .single();
   if (error) return { ok: false, error: error.message };
 
   revalidar();
-  return { ok: true };
+  // Devolvemos el id del nuevo servicio para abrir su panel de trabajadores al vuelo.
+  return { ok: true, id: data?.id as string | undefined };
 }
 
 export async function actualizarServicio(
