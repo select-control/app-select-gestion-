@@ -32,6 +32,7 @@ export function CargosClient({ cargos, rol }: { cargos: Cargo[]; rol: Rol }) {
   const esAdmin = true;
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState<Cargo | null>(null);
+  const [unidadSel, setUnidadSel] = useState<string>("hora");
 
   const accion = editando ? actualizarCargo : crearCargo;
   const [estado, formAction] = useFormState(accion, estadoInicial);
@@ -59,6 +60,7 @@ export function CargosClient({ cargos, rol }: { cargos: Cargo[]; rol: Rol }) {
           <Button
             onClick={() => {
               setEditando(null);
+              setUnidadSel("hora");
               setModalAbierto(true);
             }}
           >
@@ -91,6 +93,7 @@ export function CargosClient({ cargos, rol }: { cargos: Cargo[]; rol: Rol }) {
                   size="sm"
                   onClick={() => {
                     setEditando(c);
+                    setUnidadSel(c.unidad ?? "hora");
                     setModalAbierto(true);
                   }}
                 >
@@ -132,7 +135,7 @@ export function CargosClient({ cargos, rol }: { cargos: Cargo[]; rol: Rol }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="tarifa_hora">Precio (€)</Label>
+              <Label htmlFor="tarifa_hora">Precio por {unidadCorta(unidadSel)} (€)</Label>
               <Input
                 id="tarifa_hora"
                 name="tarifa_hora"
@@ -148,7 +151,8 @@ export function CargosClient({ cargos, rol }: { cargos: Cargo[]; rol: Rol }) {
               <Select
                 id="unidad"
                 name="unidad"
-                defaultValue={editando?.unidad ?? "hora"}
+                value={unidadSel}
+                onChange={(e) => setUnidadSel(e.target.value)}
               >
                 {UNIDADES_TARIFA.map((u) => (
                   <option key={u.valor} value={u.valor}>
