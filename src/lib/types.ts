@@ -3,11 +3,27 @@ export type Rol = "admin" | "encargado";
 export type EstadoServicio = "Pendiente" | "Realizado" | "Cancelado";
 export type FormaCobro = "efectivo" | "transferencia";
 
-/** Un cargo: define el precio/hora del trabajador que lo ejerce. */
+/** Unidad en la que se cobra un cargo: por hora, por día, por tarde o por noche. */
+export type UnidadTarifa = "hora" | "dia" | "tarde" | "noche";
+
+export const UNIDADES_TARIFA: { valor: UnidadTarifa; etiqueta: string; corta: string }[] = [
+  { valor: "hora", etiqueta: "Por hora", corta: "hora" },
+  { valor: "dia", etiqueta: "Por día", corta: "día" },
+  { valor: "tarde", etiqueta: "Por tarde", corta: "tarde" },
+  { valor: "noche", etiqueta: "Por noche", corta: "noche" },
+];
+
+/** Etiqueta corta de la unidad (para mostrar "65 € / día"). */
+export function unidadCorta(u: string | null | undefined): string {
+  return UNIDADES_TARIFA.find((x) => x.valor === u)?.corta ?? "hora";
+}
+
+/** Un cargo: define el precio del trabajador que lo ejerce y en qué unidad (hora/día/tarde/noche). */
 export interface Cargo {
   id: string;
   nombre: string;
-  tarifa_hora: number;
+  tarifa_hora: number; // importe cobrado por unidad (ver `unidad`)
+  unidad: UnidadTarifa;
   orden: number;
   created_at: string;
 }
@@ -24,7 +40,7 @@ export interface Trabajador {
 }
 
 export interface TrabajadorConCargo extends Trabajador {
-  cargos: Pick<Cargo, "nombre" | "tarifa_hora"> | null;
+  cargos: Pick<Cargo, "nombre" | "tarifa_hora" | "unidad"> | null;
 }
 
 export interface Establecimiento {

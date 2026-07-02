@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Pencil, Trash2, Plus, BadgeEuro } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
+import { Input, Label, Select } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Card } from "@/components/ui/card";
 import { formatoEuros } from "@/lib/utils";
-import type { Rol, Cargo } from "@/lib/types";
+import { UNIDADES_TARIFA, unidadCorta, type Rol, type Cargo } from "@/lib/types";
 import {
   crearCargo,
   actualizarCargo,
@@ -80,7 +80,7 @@ export function CargosClient({ cargos, rol }: { cargos: Cargo[]; rol: Rol }) {
               <div>
                 <p className="font-semibold text-slate-900">{c.nombre}</p>
                 <p className="text-sm text-slate-500">
-                  {formatoEuros(c.tarifa_hora)} / hora
+                  {formatoEuros(c.tarifa_hora)} / {unidadCorta(c.unidad)}
                 </p>
               </div>
             </div>
@@ -132,7 +132,7 @@ export function CargosClient({ cargos, rol }: { cargos: Cargo[]; rol: Rol }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="tarifa_hora">Precio por hora (€)</Label>
+              <Label htmlFor="tarifa_hora">Precio (€)</Label>
               <Input
                 id="tarifa_hora"
                 name="tarifa_hora"
@@ -144,15 +144,33 @@ export function CargosClient({ cargos, rol }: { cargos: Cargo[]; rol: Rol }) {
               />
             </div>
             <div>
-              <Label htmlFor="orden">Orden</Label>
-              <Input
-                id="orden"
-                name="orden"
-                type="number"
-                min="0"
-                defaultValue={editando?.orden ?? 0}
-              />
+              <Label htmlFor="unidad">Unidad</Label>
+              <Select
+                id="unidad"
+                name="unidad"
+                defaultValue={editando?.unidad ?? "hora"}
+              >
+                {UNIDADES_TARIFA.map((u) => (
+                  <option key={u.valor} value={u.valor}>
+                    {u.etiqueta}
+                  </option>
+                ))}
+              </Select>
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="orden">Orden</Label>
+            <Input
+              id="orden"
+              name="orden"
+              type="number"
+              min="0"
+              defaultValue={editando?.orden ?? 0}
+            />
+            <p className="mt-1 text-xs text-slate-400">
+              El precio y la unidad se pueden cambiar cuando quieras.
+            </p>
           </div>
 
           {estado.error && (

@@ -5,10 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 
 export type ResultadoAccion = { ok: boolean; error?: string };
 
+const UNIDADES_VALIDAS = ["hora", "dia", "tarde", "noche"];
+
 function leerFormulario(formData: FormData) {
+  const unidad = String(formData.get("unidad") || "hora").trim();
   return {
     nombre: String(formData.get("nombre") || "").trim(),
     tarifa_hora: Number(formData.get("tarifa_hora") || 0),
+    unidad: UNIDADES_VALIDAS.includes(unidad) ? unidad : "hora",
     orden: Number(formData.get("orden") || 0),
   };
 }

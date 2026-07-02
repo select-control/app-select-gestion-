@@ -4,6 +4,7 @@ import { getUsuarioActual } from "@/lib/auth";
 import { Logo } from "@/components/logo";
 import { PrintButton } from "@/components/print-button";
 import { formatoEuros } from "@/lib/utils";
+import { unidadCorta } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export default async function TrabajadoresLotePage({
   const { data } = ids.length
     ? await supabase
         .from("trabajadores")
-        .select("*, cargos(nombre, tarifa_hora)")
+        .select("*, cargos(nombre, tarifa_hora, unidad)")
         .in("id", ids)
         .order("nombre")
     : { data: [] as Record<string, unknown>[] };
@@ -34,7 +35,7 @@ export default async function TrabajadoresLotePage({
     telefono: string | null;
     activo: boolean;
     observaciones: string | null;
-    cargos: { nombre: string; tarifa_hora: number } | null;
+    cargos: { nombre: string; tarifa_hora: number; unidad: string } | null;
   }>;
 
   return (
@@ -82,8 +83,12 @@ export default async function TrabajadoresLotePage({
             <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
               <Dato label="Cargo" valor={t.cargos?.nombre || "—"} />
               <Dato
-                label="Precio/hora"
-                valor={t.cargos ? formatoEuros(t.cargos.tarifa_hora) : "—"}
+                label="Precio"
+                valor={
+                  t.cargos
+                    ? `${formatoEuros(t.cargos.tarifa_hora)} / ${unidadCorta(t.cargos.unidad)}`
+                    : "—"
+                }
               />
               <Dato label="Telefono" valor={t.telefono || "—"} />
               <Dato label="IBAN" valor={t.iban || "—"} mono />

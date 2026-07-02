@@ -8,7 +8,7 @@ import { Input, Label, Select, Textarea } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/card";
 import { formatoEuros } from "@/lib/utils";
-import type { Rol, TrabajadorConCargo, Cargo } from "@/lib/types";
+import { unidadCorta, type Rol, type TrabajadorConCargo, type Cargo } from "@/lib/types";
 import {
   crearTrabajador,
   actualizarTrabajador,
@@ -213,7 +213,7 @@ export function TrabajadoresClient({
               </th>
               <th className="px-4 py-3 font-medium">Nombre</th>
               <th className="px-4 py-3 font-medium">Cargo</th>
-              {esAdmin && <th className="px-4 py-3 font-medium">Precio/hora</th>}
+              {esAdmin && <th className="px-4 py-3 font-medium">Precio</th>}
               <th className="px-4 py-3 font-medium">IBAN</th>
               <th className="px-4 py-3 font-medium">Estado</th>
               <th className="px-4 py-3 text-right font-medium">Acciones</th>
@@ -242,7 +242,9 @@ export function TrabajadoresClient({
                 <td className="px-4 py-3 text-slate-500">{t.cargos?.nombre || "—"}</td>
                 {esAdmin && (
                   <td className="px-4 py-3">
-                    {t.cargos ? formatoEuros(t.cargos.tarifa_hora) : "—"}
+                    {t.cargos
+                      ? `${formatoEuros(t.cargos.tarifa_hora)} / ${unidadCorta(t.cargos.unidad)}`
+                      : "—"}
                   </td>
                 )}
                 <td className="px-4 py-3 font-mono text-xs text-slate-500">
@@ -307,7 +309,7 @@ export function TrabajadoresClient({
                 <option value="">— Sin cargo —</option>
                 {cargos.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.nombre} ({formatoEuros(c.tarifa_hora)}/h)
+                    {c.nombre} ({formatoEuros(c.tarifa_hora)}/{unidadCorta(c.unidad)})
                   </option>
                 ))}
               </Select>

@@ -12,7 +12,7 @@ export default async function TrabajadoresPage() {
   const [trabajadoresRes, cargosRes] = await Promise.all([
     supabase
       .from("trabajadores")
-      .select("*, cargos(nombre, tarifa_hora)")
+      .select("*, cargos(nombre, tarifa_hora, unidad)")
       .order("nombre", { ascending: true }),
     supabase.from("cargos").select("*").order("orden"),
   ]);
