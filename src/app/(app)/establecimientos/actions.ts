@@ -24,6 +24,7 @@ function leerFormulario(formData: FormData) {
     tarifa_hora_cliente: Number(formData.get("tarifa_hora_cliente") || 0),
     tarifas_cliente,
     activo: formData.get("activo") === "on" || formData.get("activo") === "true",
+    observaciones: String(formData.get("observaciones") || "").trim() || null,
   };
 }
 

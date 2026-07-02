@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Pencil, Trash2, Plus, Search, FileText, Paperclip } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, FileText, FileDown, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input, Label, Select } from "@/components/ui/input";
+import { Input, Label, Select, Textarea } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/card";
 import { formatoEuros } from "@/lib/utils";
@@ -44,6 +44,10 @@ export function EstablecimientosClient({
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState<Establecimiento | null>(null);
   const [busqueda, setBusqueda] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("todos"); // todos | activos | inactivos
+  const [precioMin, setPrecioMin] = useState("");
+  const [precioMax, setPrecioMax] = useState("");
+  const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
 
   const accion = editando ? actualizarEstablecimiento : crearEstablecimiento;
   const [estado, formAction] = useFormState(accion, estadoInicial);
@@ -66,13 +70,63 @@ export function EstablecimientosClient({
 
   const filtrados = establecimientos.filter((e) => {
     const t = busqueda.toLowerCase().trim();
-    if (!t) return true;
-    return (
-      e.nombre.toLowerCase().includes(t) ||
-      (e.razon_social || "").toLowerCase().includes(t) ||
-      (e.delegacion || "").toLowerCase().includes(t)
-    );
+    if (
+      t &&
+      !(
+        e.nombre.toLowerCase().includes(t) ||
+        (e.razon_social || "").toLowerCase().includes(t) ||
+        (e.delegacion || "").toLowerCase().includes(t)
+      )
+    )
+      return false;
+
+    // Filtro por estado
+    if (filtroEstado === "activos" && !e.activo) return false;
+    if (filtroEstado === "inactivos" && e.activo) return false;
+
+    // Filtro por tarifa/hora del cliente
+    const precio = e.tarifa_hora_cliente ?? 0;
+    const min = parseFloat(precioMin);
+    const max = parseFloat(precioMax);
+    if (!isNaN(min) && precio < min) return false;
+    if (!isNaN(max) && precio > max) return false;
+
+    return true;
   });
+
+  // --- Seleccion multiple ---
+  const todosSeleccionados =
+    filtrados.length > 0 && filtrados.every((e) => seleccionados.has(e.id));
+
+  function toggleUno(id: string) {
+    setSeleccionados((prev) => {
+      const s = new Set(prev);
+      if (s.has(id)) s.delete(id);
+      else s.add(id);
+      return s;
+    });
+  }
+
+  function toggleTodos() {
+    setSeleccionados((prev) => {
+      if (filtrados.length > 0 && filtrados.every((e) => prev.has(e.id))) {
+        const s = new Set(prev);
+        filtrados.forEach((e) => s.delete(e.id));
+        return s;
+      }
+      const s = new Set(prev);
+      filtrados.forEach((e) => s.add(e.id));
+      return s;
+    });
+  }
+
+  function generarPdfConjunto() {
+    const ids = filtrados.filter((e) => seleccionados.has(e.id)).map((e) => e.id);
+    if (ids.length === 0) return;
+    window.open(`/comprobante/clientes-lote?ids=${ids.join(",")}`, "_blank", "noreferrer");
+  }
+
+  const numSeleccionados = filtrados.filter((e) => seleccionados.has(e.id)).length;
 
   return (
     <div>
@@ -91,20 +145,80 @@ export function EstablecimientosClient({
         </Button>
       </div>
 
-      <div className="relative mb-4 max-w-sm">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-        <Input
-          className="pl-9"
-          placeholder="Buscar por nombre, razon social o delegacion..."
-          value={busqueda}
-          onChange={(ev) => setBusqueda(ev.target.value)}
-        />
+      {/* Buscador + filtros */}
+      <div className="mb-4 flex flex-wrap items-end gap-3">
+        <div className="relative max-w-sm flex-1 min-w-[200px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            className="pl-9"
+            placeholder="Buscar por nombre, razon social o delegacion..."
+            value={busqueda}
+            onChange={(ev) => setBusqueda(ev.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="filtroEstado" className="text-xs">Estado</Label>
+          <Select
+            id="filtroEstado"
+            className="w-40"
+            value={filtroEstado}
+            onChange={(ev) => setFiltroEstado(ev.target.value)}
+          >
+            <option value="todos">Todos</option>
+            <option value="activos">Activos</option>
+            <option value="inactivos">Inactivos</option>
+          </Select>
+        </div>
+        {esAdmin && (
+          <div>
+            <Label className="text-xs">Tarifa/hora (€)</Label>
+            <div className="flex items-center gap-1">
+              <Input
+                className="w-24"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Desde"
+                value={precioMin}
+                onChange={(ev) => setPrecioMin(ev.target.value)}
+              />
+              <span className="text-slate-400">–</span>
+              <Input
+                className="w-24"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Hasta"
+                value={precioMax}
+                onChange={(ev) => setPrecioMax(ev.target.value)}
+              />
+            </div>
+          </div>
+        )}
+        <Button
+          variant="secondary"
+          onClick={generarPdfConjunto}
+          disabled={numSeleccionados === 0}
+          title={numSeleccionados === 0 ? "Selecciona al menos un cliente" : "Generar un PDF con los seleccionados"}
+        >
+          <FileDown className="h-4 w-4" />
+          Generar PDF {numSeleccionados > 0 ? `(${numSeleccionados})` : ""}
+        </Button>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200">
         <table className="w-full text-sm">
           <thead className="bg-slate-100 text-left text-slate-500">
             <tr>
+              <th className="px-4 py-3 w-10">
+                <input
+                  type="checkbox"
+                  aria-label="Seleccionar todos"
+                  className="h-4 w-4 cursor-pointer accent-brand"
+                  checked={todosSeleccionados}
+                  onChange={toggleTodos}
+                />
+              </th>
               <th className="px-4 py-3 font-medium">Nombre</th>
               <th className="px-4 py-3 font-medium">Delegacion</th>
               <th className="px-4 py-3 font-medium">CIF</th>
@@ -117,13 +231,22 @@ export function EstablecimientosClient({
           <tbody className="divide-y divide-slate-200 bg-white">
             {filtrados.length === 0 && (
               <tr>
-                <td colSpan={esAdmin ? 7 : 6} className="px-4 py-10 text-center text-slate-400">
+                <td colSpan={esAdmin ? 8 : 7} className="px-4 py-10 text-center text-slate-400">
                   No hay establecimientos que mostrar.
                 </td>
               </tr>
             )}
             {filtrados.map((e) => (
               <tr key={e.id} className="text-slate-800 hover:bg-slate-50">
+                <td className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    aria-label={`Seleccionar ${e.nombre}`}
+                    className="h-4 w-4 cursor-pointer accent-brand"
+                    checked={seleccionados.has(e.id)}
+                    onChange={() => toggleUno(e.id)}
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <p className="font-medium">{e.nombre}</p>
                   {e.razon_social && (
@@ -315,6 +438,16 @@ export function EstablecimientosClient({
               <option value="true">Activo</option>
               <option value="false">Inactivo</option>
             </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="observaciones">Observaciones</Label>
+            <Textarea
+              id="observaciones"
+              name="observaciones"
+              placeholder="Notas internas sobre el cliente..."
+              defaultValue={editando?.observaciones ?? ""}
+            />
           </div>
 
           {estado.error && (

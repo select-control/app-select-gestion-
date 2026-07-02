@@ -19,6 +19,7 @@ export interface Trabajador {
   telefono: string | null;
   cargo_id: string | null;
   activo: boolean;
+  observaciones: string | null;
   created_at: string;
 }
 
@@ -37,6 +38,7 @@ export interface Establecimiento {
   tarifa_hora_cliente: number; // tarifa general (fallback si un cargo no tiene precio propio)
   tarifas_cliente: Record<string, number>; // { cargo_id: precio_hora que se cobra al cliente }
   activo: boolean;
+  observaciones: string | null;
   created_at: string;
 }
 

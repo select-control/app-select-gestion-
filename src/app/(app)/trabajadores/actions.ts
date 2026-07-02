@@ -12,6 +12,7 @@ function leerFormulario(formData: FormData) {
     telefono: String(formData.get("telefono") || "").trim() || null,
     cargo_id: String(formData.get("cargo_id") || "").trim() || null,
     activo: formData.get("activo") === "on" || formData.get("activo") === "true",
+    observaciones: String(formData.get("observaciones") || "").trim() || null,
   };
 }
 
