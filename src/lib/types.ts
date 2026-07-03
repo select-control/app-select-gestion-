@@ -51,6 +51,7 @@ export interface Establecimiento {
   direccion: string | null;
   delegacion: string | null;
   email: string | null;
+  email_adicional: string | null;
   tarifa_hora_cliente: number; // tarifa general (fallback si un cargo no tiene precio propio)
   tarifas_cliente: Record<string, number>; // { cargo_id: precio_hora que se cobra al cliente }
   activo: boolean;

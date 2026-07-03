@@ -21,6 +21,7 @@ function leerFormulario(formData: FormData) {
     direccion: String(formData.get("direccion") || "").trim() || null,
     delegacion: String(formData.get("delegacion") || "").trim() || null,
     email: String(formData.get("email") || "").trim().toLowerCase() || null,
+    email_adicional: String(formData.get("email_adicional") || "").trim().toLowerCase() || null,
     tarifa_hora_cliente: Number(formData.get("tarifa_hora_cliente") || 0),
     tarifas_cliente,
     activo: formData.get("activo") === "on" || formData.get("activo") === "true",

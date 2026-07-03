@@ -38,6 +38,7 @@ export default async function ClientesLotePage({
     direccion: string | null;
     email: string | null;
     delegacion: string | null;
+    email_adicional: string | null;
     tarifa_hora_cliente: number;
     tarifas_cliente: Record<string, number> | null;
     activo: boolean;
@@ -98,6 +99,7 @@ export default async function ClientesLotePage({
                 <Dato label="Delegacion" valor={e.delegacion || "—"} />
                 <Dato label="Direccion" valor={e.direccion || "—"} />
                 <Dato label="Email" valor={e.email || "—"} />
+                {e.email_adicional && <Dato label="Email adicional" valor={e.email_adicional} />}
                 <Dato label="Tarifa general/hora" valor={formatoEuros(e.tarifa_hora_cliente)} />
               </div>
               {tarifas.length > 0 && (

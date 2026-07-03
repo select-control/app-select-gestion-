@@ -368,6 +368,17 @@ export function EstablecimientosClient({
             </div>
           </div>
 
+          <div>
+            <Label htmlFor="email_adicional">Email adicional</Label>
+            <Input
+              id="email_adicional"
+              name="email_adicional"
+              type="email"
+              placeholder="otro@email.com (opcional)"
+              defaultValue={editando?.email_adicional ?? ""}
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="delegacion">Delegacion</Label>
