@@ -102,15 +102,43 @@ export async function actualizarServicio(
   const err = validarServicio(datos);
   if (err) return { ok: false, error: err };
 
-  const est = await datosEstablecimiento(supabase, datos.establecimiento_id);
+  // Estado ANTERIOR del servicio, para decidir si esta edicion afecta al precio.
+  // REGLA (Adri): un cambio de precio/hora/lo-que-sea NUNCA afecta hacia atras.
+  // Los precios guardados (del cliente y del trabajador) solo se recalculan si
+  // el usuario cambia, a proposito, el CLIENTE del servicio o su PRECIO ESPECIAL.
+  // Editar fecha, horas, estado, observaciones o puestos NO toca ningun precio.
+  const { data: previo } = await supabase
+    .from("servicios")
+    .select("establecimiento_id, precio_especial, precio_hora_cliente, delegacion")
+    .eq("id", id)
+    .single();
+
+  const norm = (v: unknown) => (v == null || Number(v) <= 0 ? null : Number(v));
+  const clienteCambiado =
+    (previo?.establecimiento_id ?? "") !== datos.establecimiento_id;
+  const especialCambiado = norm(previo?.precio_especial) !== norm(datos.precio_especial);
+
+  // Precio estandar y delegacion del servicio: solo se actualizan si cambia el
+  // cliente; si no, se conservan tal cual (nunca se re-aplica un precio nuevo).
+  let precio_hora_cliente = Number(previo?.precio_hora_cliente) || 0;
+  let delegacion = previo?.delegacion ?? null;
+  if (clienteCambiado) {
+    const est = await datosEstablecimiento(supabase, datos.establecimiento_id);
+    precio_hora_cliente = est.tarifa;
+    delegacion = est.delegacion;
+  }
+
   const { error } = await supabase
     .from("servicios")
-    .update({ ...datos, precio_hora_cliente: est.tarifa, delegacion: est.delegacion })
+    .update({ ...datos, precio_hora_cliente, delegacion })
     .eq("id", id);
   if (error) return { ok: false, error: error.message };
 
-  // El precio o el cliente pueden haber cambiado: re-fija el precio de cada asignacion.
-  await repreciarServicio(supabase, id);
+  // Solo re-fijamos el precio de las asignaciones ante un cambio DELIBERADO de
+  // cliente o precio especial. En cualquier otra edicion se quedan congeladas.
+  if (clienteCambiado || especialCambiado) {
+    await repreciarServicio(supabase, id);
+  }
 
   revalidar();
   return { ok: true };
