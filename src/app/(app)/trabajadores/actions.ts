@@ -8,6 +8,7 @@ export type ResultadoAccion = { ok: boolean; error?: string };
 function leerFormulario(formData: FormData) {
   return {
     nombre: String(formData.get("nombre") || "").trim(),
+    alias: String(formData.get("alias") || "").trim() || null,
     iban: String(formData.get("iban") || "").trim().toUpperCase().replace(/\s+/g, "") || null,
     telefono: String(formData.get("telefono") || "").trim() || null,
     cargo_id: String(formData.get("cargo_id") || "").trim() || null,

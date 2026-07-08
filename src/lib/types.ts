@@ -31,6 +31,7 @@ export interface Cargo {
 export interface Trabajador {
   id: string;
   nombre: string;
+  alias: string | null;
   iban: string | null;
   telefono: string | null;
   cargo_id: string | null;
@@ -96,7 +97,7 @@ export interface Asignacion {
 }
 
 export interface AsignacionConRelaciones extends Asignacion {
-  trabajadores: Pick<Trabajador, "nombre"> | null;
+  trabajadores: Pick<Trabajador, "nombre" | "alias"> | null;
   cargos: Pick<Cargo, "nombre"> | null;
 }
 

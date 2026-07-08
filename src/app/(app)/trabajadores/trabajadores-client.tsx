@@ -65,6 +65,7 @@ export function TrabajadoresClient({
       q &&
       !(
         t.nombre.toLowerCase().includes(q) ||
+        (t.alias || "").toLowerCase().includes(q) ||
         (t.cargos?.nombre || "").toLowerCase().includes(q)
       )
     )
@@ -143,7 +144,7 @@ export function TrabajadoresClient({
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             className="pl-9"
-            placeholder="Buscar por nombre o cargo..."
+            placeholder="Buscar por nombre, alias o cargo..."
             value={busqueda}
             onChange={(ev) => setBusqueda(ev.target.value)}
           />
@@ -238,7 +239,14 @@ export function TrabajadoresClient({
                     onChange={() => toggleUno(t.id)}
                   />
                 </td>
-                <td className="px-4 py-3 font-medium">{t.nombre}</td>
+                <td className="px-4 py-3 font-medium">
+                  {t.nombre}
+                  {t.alias && (
+                    <span className="ml-2 rounded-full bg-brand/15 px-2 py-0.5 text-xs font-medium text-slate-600">
+                      {t.alias}
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-slate-500">{t.cargos?.nombre || "—"}</td>
                 {esAdmin && (
                   <td className="px-4 py-3">
@@ -293,9 +301,20 @@ export function TrabajadoresClient({
         <form action={formAction} className="space-y-4">
           {editando && <input type="hidden" name="id" value={editando.id} />}
 
-          <div>
-            <Label htmlFor="nombre">Nombre completo</Label>
-            <Input id="nombre" name="nombre" required defaultValue={editando?.nombre} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="nombre">Nombre completo</Label>
+              <Input id="nombre" name="nombre" required defaultValue={editando?.nombre} />
+            </div>
+            <div>
+              <Label htmlFor="alias">Alias</Label>
+              <Input
+                id="alias"
+                name="alias"
+                placeholder="Apodo / nombre corto"
+                defaultValue={editando?.alias ?? ""}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

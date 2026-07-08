@@ -527,7 +527,12 @@ function DetalleAsignaciones({
                   return (
                     <tr key={a.id} className="text-slate-800">
                       <td className="px-3 py-2">{a.hueco}</td>
-                      <td className="px-3 py-2">{a.trabajadores?.nombre || "Sin asignar"}</td>
+                      <td className="px-3 py-2">
+                        {a.trabajadores?.nombre || "Sin asignar"}
+                        {a.trabajadores?.alias && (
+                          <span className="ml-1.5 text-xs text-slate-400">({a.trabajadores.alias})</span>
+                        )}
+                      </td>
                       <td className="px-3 py-2 text-slate-500">{a.cargos?.nombre || "—"}</td>
                       <td className="whitespace-nowrap px-3 py-2 text-slate-500">
                         {a.hora_inicio?.slice(0, 5)}–{a.hora_fin?.slice(0, 5)}
@@ -577,7 +582,9 @@ function DetalleAsignaciones({
               <Select id="a_trab" value={trabajadorId} onChange={(e) => onElegirTrabajador(e.target.value)}>
                 <option value="">— Selecciona —</option>
                 {trabajadores.map((t) => (
-                  <option key={t.id} value={t.id}>{t.nombre}</option>
+                  <option key={t.id} value={t.id}>
+                    {t.alias ? `${t.nombre} (${t.alias})` : t.nombre}
+                  </option>
                 ))}
               </Select>
             </div>

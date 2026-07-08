@@ -19,7 +19,7 @@ export default async function ServiciosPage() {
       supabase
         .from("servicios")
         .select(
-          "*, establecimientos(nombre, tarifa_hora_cliente), asignaciones(*, trabajadores(nombre), cargos(nombre))"
+          "*, establecimientos(nombre, tarifa_hora_cliente), asignaciones(*, trabajadores(nombre, alias), cargos(nombre))"
         )
         .order("fecha", { ascending: false }),
       supabase
