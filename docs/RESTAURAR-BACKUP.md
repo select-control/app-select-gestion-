@@ -2,42 +2,43 @@
 
 ## Qué se guarda y cada cuánto
 - **Automático:** el día **1 de cada mes** un robot de GitHub Actions
-  (`.github/workflows/backup-mensual.yml`) hace una copia de todos los datos.
-- **Qué copia:** el esquema `public` de la base de Supabase, es decir TODOS los
-  datos del negocio: cargos, establecimientos, trabajadores, servicios,
-  asignaciones y usuarios de la app.
+  (`.github/workflows/backup-mensual.yml`) hace una copia de todos los datos
+  usando la API de Supabase.
+- **Qué copia:** todas las tablas del negocio: `cargos`, `establecimientos`,
+  `trabajadores`, `servicios`, `asignaciones` y `usuarios_app`.
 - **Dónde se guardan:** en la rama **`backups`** de este repositorio
-  (`select-control/app-select-gestion-`). Cada mes deja un archivo
-  `backups/select-control-AAAA-MM.sql.gz` y actualiza `backups/latest.sql.gz`
-  (el más reciente). Se conservan los **últimos 12 meses**.
+  (`select-control/app-select-gestion-`). Cada mes deja:
+  - `backups/select-control-AAAA-MM.json.gz` — los datos de ese mes,
+  - `backups/latest.json.gz` — el más reciente,
+  - `backups/esquema.sql` — el esquema de la base (para recrear las tablas).
+  Se conservan los **últimos 12 meses**.
 - Al estar en GitHub, están **fuera de Supabase**: si se pierde algo en la app,
   el backup sigue a salvo.
 
 ## Lanzar una copia a mano (sin esperar al día 1)
 GitHub → repo `app-select-gestion-` → pestaña **Actions** →
-"Backup mensual de datos" → botón **Run workflow**.
+"Backup mensual de datos" → **Run workflow**.
 
 ## Cómo restaurar (recuperar los datos)
-> ⚠️ Restaurar SOBRESCRIBE los datos actuales del esquema `public`
-> (borra y vuelve a crear las tablas con el contenido del backup).
-> Hazlo solo si de verdad quieres volver a ese punto.
+> ⚠️ Restaurar **borra** los datos actuales de esas tablas y los sustituye por
+> los del backup. Hazlo solo si de verdad quieres volver a ese punto.
 
-1. Descarga el backup que quieras de la rama `backups`
-   (por ejemplo `backups/latest.sql.gz`).
-2. Descomprímelo:
+1. Descarga de la rama `backups` el archivo que quieras (p. ej. `latest.json.gz`).
+2. Si las tablas ya no existen (pérdida total), recréalas primero cargando
+   `esquema.sql` en Supabase (SQL Editor → pegar y ejecutar).
+3. Vuelca los datos con el script incluido:
    ```bash
-   gunzip -k latest.sql.gz      # deja latest.sql
+   SUPABASE_SECRET_KEY="sb_secret_..." \
+     node scripts/restaurar-datos.mjs latest.json.gz --confirmar
    ```
-3. Cárgalo en la base con la cadena de conexión "Session pooler" de Supabase:
-   ```bash
-   psql "postgresql://...session-pooler..." -f latest.sql
-   ```
-   El archivo ya incluye los `DROP ... IF EXISTS` y `CREATE`, así que deja la
-   base tal cual estaba en la fecha del backup.
+   - Sin `--confirmar` hace un **simulacro** (te dice qué haría, sin tocar nada).
+   - Borra e inserta respetando el orden de dependencias entre tablas.
+   - `usuarios_app` depende de las cuentas de acceso (`auth.users`); si también
+     se perdieron esas, hay que recrear los usuarios desde la página `/usuarios`.
 
-## Secreto necesario (una sola vez)
-El robot necesita el secreto de repositorio **`SUPABASE_DB_URL`** con la cadena
-de conexión **Session pooler** de Supabase
-(Dashboard → Project Settings → Database → Connection string → Session pooler).
+## Clave necesaria (una sola vez)
+El robot necesita el secreto de repositorio **`SUPABASE_SECRET_KEY`** con la
+clave **secreta** (`sb_secret_...`) de la API de Supabase
+(Dashboard → Project Settings → API keys).
 Se define en: repo → Settings → Secrets and variables → Actions →
 New repository secret.
