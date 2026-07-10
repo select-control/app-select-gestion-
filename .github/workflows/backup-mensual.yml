@@ -1,0 +1,66 @@
+name: Backup mensual de datos (Select Control)
+
+# Copia de seguridad automatica de los datos de Supabase.
+# - Se ejecuta el dia 1 de cada mes (03:00 UTC).
+# - Tambien se puede lanzar a mano desde la pestana "Actions" (Run workflow).
+# Los backups se guardan en la rama "backups" de este repo (no en main), asi
+# que NO disparan ningun deploy de Vercel.
+#
+# REQUISITO: definir el secreto de repositorio SUPABASE_DB_URL
+#   (Settings > Secrets and variables > Actions > New repository secret)
+#   con la cadena de conexion "Session pooler" de Supabase.
+
+on:
+  schedule:
+    - cron: '0 3 1 * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backup-datos-select
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (main, para el script de backup)
+        uses: actions/checkout@v4
+
+      - name: Instalar pg_dump 17
+        run: |
+          sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+
+      - name: Generar el backup
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          OUT_DIR: ${{ runner.temp }}/backups
+        run: bash scripts/backup-datos.sh
+
+      - name: Guardar en la rama 'backups'
+        env:
+          OUT_DIR: ${{ runner.temp }}/backups
+        run: |
+          git config user.name "backup-bot"
+          git config user.email "backup@dfe.local"
+          git fetch origin backups || true
+          if git show-ref --verify --quiet refs/remotes/origin/backups; then
+            git checkout -B backups origin/backups
+          else
+            git checkout --orphan backups
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          mkdir -p backups
+          cp "$OUT_DIR"/*.sql.gz backups/
+          git add backups
+          if git diff --cached --quiet; then
+            echo "Sin cambios en el backup de este mes."
+            exit 0
+          fi
+          git commit -m "backup: datos $(date -u +%Y-%m)"
+          git push origin backups
