@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useFormState, useFormStatus } from "react-dom";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Pencil, Trash2, Plus, Users, AlertTriangle, X } from "lucide-react";
+import { Pencil, Trash2, Plus, Users, AlertTriangle, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
@@ -410,6 +410,88 @@ export function ServiciosClient({
 }
 
 // ============================================================================
+// Buscador de trabajador: filtra por nombre O alias (no solo por el nombre,
+// como hacia el desplegable nativo). Escribe y elige de la lista.
+function SelectorTrabajador({
+  trabajadores,
+  value,
+  onSelect,
+}: {
+  trabajadores: TrabajadorConCargo[];
+  value: string;
+  onSelect: (id: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [abierto, setAbierto] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const seleccionado = trabajadores.find((t) => t.id === value) || null;
+
+  // Cerrar al hacer click fuera del componente.
+  useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setAbierto(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  const q = query.toLowerCase().trim();
+  const filtrados = q
+    ? trabajadores.filter(
+        (t) =>
+          t.nombre.toLowerCase().includes(q) ||
+          (t.alias || "").toLowerCase().includes(q)
+      )
+    : trabajadores;
+
+  // Mientras el desplegable esta abierto se muestra lo que escribe; si esta
+  // cerrado, el trabajador ya elegido (con su alias).
+  const textoInput = abierto
+    ? query
+    : seleccionado
+    ? seleccionado.alias
+      ? `${seleccionado.nombre} (${seleccionado.alias})`
+      : seleccionado.nombre
+    : "";
+
+  return (
+    <div className="relative" ref={ref}>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <Input
+          id="a_trab"
+          className="pl-8"
+          placeholder="Nombre o alias…"
+          value={textoInput}
+          onFocus={() => { setAbierto(true); setQuery(""); }}
+          onChange={(e) => { setQuery(e.target.value); setAbierto(true); }}
+        />
+      </div>
+      {abierto && (
+        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg">
+          {filtrados.length === 0 && (
+            <li className="px-3 py-2 text-slate-400">Sin resultados</li>
+          )}
+          {filtrados.map((t) => (
+            <li key={t.id}>
+              <button
+                type="button"
+                className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left hover:bg-slate-100"
+                onClick={() => { onSelect(t.id); setAbierto(false); setQuery(""); }}
+              >
+                <span className="text-slate-800">{t.nombre}</span>
+                {t.alias && <span className="text-xs text-slate-400">{t.alias}</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
 function DetalleAsignaciones({
   servicio,
   trabajadores,
@@ -579,14 +661,11 @@ function DetalleAsignaciones({
             </div>
             <div className="col-span-2 sm:col-span-2">
               <Label htmlFor="a_trab">Trabajador</Label>
-              <Select id="a_trab" value={trabajadorId} onChange={(e) => onElegirTrabajador(e.target.value)}>
-                <option value="">— Selecciona —</option>
-                {trabajadores.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.alias ? `${t.nombre} (${t.alias})` : t.nombre}
-                  </option>
-                ))}
-              </Select>
+              <SelectorTrabajador
+                trabajadores={trabajadores}
+                value={trabajadorId}
+                onSelect={onElegirTrabajador}
+              />
             </div>
             <div>
               <Label htmlFor="a_cargo">Cargo</Label>
